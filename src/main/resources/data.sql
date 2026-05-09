@@ -66,3 +66,6 @@ INSERT INTO cardapio_produto (cardapio_id,produto_id) VALUES (1,3);
 
 INSERT INTO cardapio_produto (cardapio_id,produto_id) VALUES (2,1);
 INSERT INTO cardapio_produto (cardapio_id,produto_id) VALUES (2,3);
+
+-- Inserção de configurações
+INSERT INTO CONFIG (chave, valor) VALUES ('cardapio_corrente', '1');
