@@ -63,3 +63,9 @@ create table if not exists cardapio_produto (
   foreign key (cardapio_id) references cardapios(id),
   foreign key (produto_id) references produtos(id)
 );
+
+--tabela config
+create table if not exists config(
+  chave varchar(50) primary key,
+  valor varchar(100) not null
+)
