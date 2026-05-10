@@ -29,6 +29,7 @@ INSERT INTO receitas (id, titulo) VALUES (1, 'Pizza calabresa');
 INSERT INTO receitas (id, titulo) VALUES (2, 'Pizza queijo e presunto');
 INSERT INTO receitas (id, titulo) VALUES (3, 'Pizza margherita');
 
+
 -- Associação dos ingredientes à receita Pizza calabresa
 INSERT INTO receita_ingrediente (receita_id, ingrediente_id) VALUES (1, 1); -- Disco de pizza
 INSERT INTO receita_ingrediente (receita_id, ingrediente_id) VALUES (1, 6); -- Molho de tomate (200ml)
@@ -50,10 +51,20 @@ INSERT INTO produtos (id,descricao,preco) VALUES (1,'Pizza calabresa',5500);
 INSERT INTO produtos (id,descricao,preco) VALUES (2,'Pizza queijo e presunto',6000);
 INSERT INTO produtos (id,descricao,preco) VALUES (3,'Pizza margherita',4000);
 
+-- insercao de mais produtos para teste
+INSERT INTO produtos (id,descricao,preco) VALUES (4,'Pizza portuguesa',6500);
+INSERT INTO produtos (id,descricao,preco) VALUES (5,'Pizza frango com catupiry',7000);
+INSERT INTO produtos (id,descricao,preco) VALUES (6,'Pizza quatro queijos',7500);
+
 -- Associação dos produtos com as receitas
 INSERT INTO produto_receita (produto_id,receita_id) VALUES(1,1);
 INSERT INTO produto_receita (produto_id,receita_id) VALUES(2,2);
 INSERT INTO produto_receita (produto_id,receita_id) VALUES(3,3);
+
+-- Associação dos produtos com as receitas para teste
+INSERT INTO produto_receita (produto_id,receita_id) VALUES(4,1);
+INSERT INTO produto_receita (produto_id,receita_id) VALUES(5,2);
+INSERT INTO produto_receita (produto_id,receita_id) VALUES(6,3);
 
 -- Insercao dos cardapios
 INSERT INTO cardapios (id,titulo) VALUES(1,'Cardapio de Agosto');
@@ -66,6 +77,11 @@ INSERT INTO cardapio_produto (cardapio_id,produto_id) VALUES (1,3);
 
 INSERT INTO cardapio_produto (cardapio_id,produto_id) VALUES (2,1);
 INSERT INTO cardapio_produto (cardapio_id,produto_id) VALUES (2,3);
+INSERT INTO cardapio_produto (cardapio_id,produto_id) VALUES (2,4);
+INSERT INTO cardapio_produto (cardapio_id,produto_id) VALUES (2,5);
+INSERT INTO cardapio_produto (cardapio_id,produto_id) VALUES (2,6);
+
+
 
 -- Inserção de configurações
-INSERT INTO CONFIG (chave, valor) VALUES ('cardapio_corrente', '1');
+INSERT INTO CONFIG (chave, valor) VALUES ('cardapio_corrente', '2');
