@@ -31,4 +31,9 @@ public class CardapioService {
     public List<Produto> recuperaSugestoesDoChef(){
         return cardapioRepository.indicacoesDoChef();
     }
+
+    public Cardapio recuperaCardapioCorrente(){
+        long id = cardapioRepository.recuperaIdCardapioCorrente();
+        return cardapioRepository.recuperaPorId(id);
+    } 
 }

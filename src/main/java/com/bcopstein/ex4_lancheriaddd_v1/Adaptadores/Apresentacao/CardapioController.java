@@ -16,17 +16,25 @@ import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.RecuperaListaCardapiosUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.RecuperarCardapioUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.CardapioResponse;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Produto;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.CarregarCardapioUC;
+
+
 
 @RestController
 @RequestMapping("/cardapio")
 public class CardapioController {
     private RecuperarCardapioUC recuperaCardapioUC;
     private RecuperaListaCardapiosUC recuperaListaCardapioUC;
+    private CarregarCardapioUC carregarCardapioUC;
 
     public CardapioController(RecuperarCardapioUC recuperaCardapioUC,
-                              RecuperaListaCardapiosUC recuperaListaCardapioUC) {
+                              RecuperaListaCardapiosUC recuperaListaCardapioUC,
+                            CarregarCardapioUC carregarCardapioUC) {
         this.recuperaCardapioUC = recuperaCardapioUC;
         this.recuperaListaCardapioUC = recuperaListaCardapioUC;
+        this.carregarCardapioUC = carregarCardapioUC;
     }
 
     @GetMapping("/{id}")
@@ -53,4 +61,32 @@ public class CardapioController {
             .toList();
          return lstCardapios;
     }
+
+    @GetMapping("/corrente")
+    @CrossOrigin("*") //CrossOrigin é necessário para permitir que o frontend acesse este endpoint mesmo que esteja em um domínio diferente, 
+    // o que é comum durante o desenvolvimento
+    public CardapioPresenter carregarCardapio() {
+        CardapioResponse cardapioResponse = carregarCardapioUC.run();      
+        Set<Long> conjIdSugestoes = new HashSet<>(cardapioResponse.getSugestoesDoChef()
+            .stream()
+            .map(p -> p.getId())
+            .toList());     
+        
+        CardapioPresenter presenter = new CardapioPresenter(
+            cardapioResponse.getCardapio().getCabecalhoCardapio().titulo()
+        );
+
+        for (Produto produto : cardapioResponse.getCardapio().getProdutos()) {
+            boolean sugestao = conjIdSugestoes.contains(produto.getId());
+            presenter.insereItem(
+                produto.getId(),
+                produto.getDescricao(),
+                produto.getPreco(),
+                sugestao
+            );
+        }
+
+        return presenter;
+    }
+    
 }
