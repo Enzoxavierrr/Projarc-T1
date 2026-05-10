@@ -24,6 +24,7 @@ public class Pedido {
     private double desconto;
     private double valorCobrado;
 
+
     public Pedido(long id, Cliente cliente, LocalDateTime dataHoraPagamento, List<ItemPedido> itens,
             Pedido.Status status, double valor, double impostos, double desconto, double valorCobrado) {
         this.id = id;
@@ -76,4 +77,22 @@ public class Pedido {
     public double getValorCobrado() {
         return valorCobrado;
     }
+
+    public void setValor(double valor) {
+        this.valor = valor;
+    }
+
+    public void setDesconto(double desconto) {
+        this.desconto = desconto;
+    }
+
+    public void setImpostos(double impostos) {
+        this.impostos = impostos;
+    }
+
+    public void setValorCobrado(double valorCobrado) {
+        this.valorCobrado = valorCobrado;
+    }
+
+
 }
