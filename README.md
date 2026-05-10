@@ -440,19 +440,3 @@ Este projeto exemplifica:
 - [Spring Boot Official Documentation](https://spring.io/projects/spring-boot)
 
 ---
-
-## 👨‍💻 Autor
-
-Desenvolvido como projeto educacional - Quinto Semestre
-
----
-
-## 📄 Licença
-
-Este projeto é fornecido como material educacional.
-
----
-
-**Última atualização:** 6 de Maio de 2026  
-**Versão Java:** 21 LTS  
-**Versão Spring Boot:** 3.5.4
