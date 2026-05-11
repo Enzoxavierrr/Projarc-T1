@@ -63,7 +63,9 @@ public class CardapioController {
     }
 
     @GetMapping("/corrente")
-    @CrossOrigin("*") //CrossOrigin é necessário para permitir que o frontend acesse este endpoint mesmo que esteja em um domínio diferente, 
+    @CrossOrigin("*") 
+    //CrossOrigin é necessário para permitir que o frontend acesse 
+    // este endpoint mesmo que esteja em um domínio diferente, 
     // o que é comum durante o desenvolvimento
     public CardapioPresenter carregarCardapio() {
         CardapioResponse cardapioResponse = carregarCardapioUC.run();      

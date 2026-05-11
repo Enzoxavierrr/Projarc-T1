@@ -60,7 +60,7 @@ public class CardapioRepositoryJDBC implements CardapioRepository{
     
     @Override // Override ajuda a garantir que o método realmente existe na interface, evitando erros de digitação
     public long recuperaIdCardapioCorrente() {
-        String sql = "SELECT valor FROM config WHERE chave = 'cardapio_corrente'";
+        String sql = "SELECT cardapio_ativo FROM config WHERE nome_cardapio = 'cardapio_corrente'";
         return Long.parseLong(jdbcTemplate.queryForObject(sql, String.class));
     }
 }
