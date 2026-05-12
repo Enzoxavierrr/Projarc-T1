@@ -29,9 +29,10 @@ public class PedidoService {
         }
 
         public ResultadoPedido processarPedido(Pedido pedido){
+            //verificar estoque
             List<ItemPedido> itensIndisponiveis = estoqueService.verificarEstoque(pedido.getItens());
             if(!itensIndisponiveis.isEmpty()){
-                pedido.setStatus(Pedido.Status.NOVO);
+                pedido.setStatus(Pedido.Status.REPROVADO);
                 return new ResultadoPedido(pedido, itensIndisponiveis);
             }
 
@@ -49,8 +50,8 @@ public class PedidoService {
             pedido.setDesconto(desconto);
             pedido.setValorCobrado(valorCobrado);
 
-            Pedido pedidoSalvo = pedidoRepository.salvar(pedido);
-            return new ResultadoPedido(pedidoSalvo, List.of());
+            //salvar pedido
+            return new ResultadoPedido(pedidoRepository.salvar(pedido), List.of());
         }
 
 }
