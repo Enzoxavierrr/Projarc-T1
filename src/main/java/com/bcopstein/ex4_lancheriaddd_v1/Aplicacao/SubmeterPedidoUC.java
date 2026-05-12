@@ -14,6 +14,7 @@ import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.ItemPedido;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Pedido;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Produto;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos.PedidoService;
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos.ResultadoPedido;
 
 @Component
 public class SubmeterPedidoUC {
@@ -46,8 +47,8 @@ public class SubmeterPedidoUC {
         Pedido pedido = new Pedido(0, cliente, null, itens, Pedido.Status.NOVO, 0, 0, 0, 0);
 
         // processa
-        Pedido pedidoProcessado = pedidoService.processarPedido(pedido);
+        ResultadoPedido resultado = pedidoService.processarPedido(pedido);
 
-        return new PedidoResponse(pedidoProcessado, List.of());
+        return new PedidoResponse(resultado.pedido(), resultado.itensIndisponiveis());
     }
 }

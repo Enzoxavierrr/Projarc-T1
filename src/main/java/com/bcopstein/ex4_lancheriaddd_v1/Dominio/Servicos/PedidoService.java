@@ -27,12 +27,12 @@ public class PedidoService {
             this.estoqueService = estoqueService;  
         }
 
-        public Pedido processarPedido(Pedido pedido){
+        public ResultadoPedido processarPedido(Pedido pedido){
             //verificar estoque
             List<ItemPedido> itensIndisponiveis = estoqueService.verificarEstoque(pedido.getItens());
             if(!itensIndisponiveis.isEmpty()){
-                pedido.setStatus(Pedido.Status.NOVO);
-                return pedido; // retorna sem salvar, UC que trata
+                pedido.setStatus(Pedido.Status.REPROVADO);
+                return new ResultadoPedido(pedido, itensIndisponiveis);
             }
             //calcular desconto
             double subtotal = pedido.getItens().stream()
@@ -53,7 +53,7 @@ public class PedidoService {
             pedido.setValorCobrado(valorCobrado);
 
             //salvar pedido
-            return pedidoRepository.salvar(pedido);
+            return new ResultadoPedido(pedidoRepository.salvar(pedido), List.of());
         }
 
 }
