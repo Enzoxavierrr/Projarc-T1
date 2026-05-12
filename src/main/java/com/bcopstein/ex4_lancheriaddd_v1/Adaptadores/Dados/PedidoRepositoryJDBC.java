@@ -93,7 +93,10 @@ public class PedidoRepositoryJDBC implements PedidoRepository {
 
     @Override
     public void atualizarStatus(long id, Pedido.Status status) {
-        jdbcTemplate.update("UPDATE pedidos SET status = ? WHERE id = ?", status.name(), id);
+        int linhasAfetadas = jdbcTemplate.update("UPDATE pedidos SET status = ? WHERE id = ?", status.name(), id);
+        if (linhasAfetadas == 0) {
+            throw new IllegalStateException("Nenhum pedido foi atualizado para o id " + id + ".");
+        }
     }
 
 }
