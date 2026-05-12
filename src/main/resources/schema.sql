@@ -81,6 +81,7 @@ create table if not exists pedidos (
     impostos double not null,
     desconto double not null,
     valor_cobrado double not null,
+    endereco_entrega varchar(255),
     foreign key (cliente_cpf) references clientes(cpf)
 );
 
