@@ -5,14 +5,17 @@ import java.util.List;
 public class SubmeterPedidoRequest {
     private String clienteCpf;
     private List<ItemPedidoRequest> itens;
+    private String enderecoEntrega;
 
-    public SubmeterPedidoRequest(String clienteCpf, List<ItemPedidoRequest> itens) {
+    public SubmeterPedidoRequest(String clienteCpf, List<ItemPedidoRequest> itens, String enderecoEntrega) {
         this.clienteCpf = clienteCpf;
         this.itens = itens;
+        this.enderecoEntrega = enderecoEntrega;
     }
 
     public String getClienteCpf() { return clienteCpf; }
     public List<ItemPedidoRequest> getItens() { return itens; }
+    public String getEnderecoEntrega() { return enderecoEntrega; }
 
     public static class ItemPedidoRequest {
         private long produtoId;

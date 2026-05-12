@@ -25,7 +25,7 @@ public class PedidoRepositoryJDBC implements PedidoRepository {
 
     @Override
     public Pedido salvar(Pedido pedido) {
-        String sql = "INSERT INTO pedidos (cliente_cpf, data_criacao, data_hora_pagamento, status, valor, impostos, desconto, valor_cobrado) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO pedidos (cliente_cpf, data_criacao, data_hora_pagamento, status, valor, impostos, desconto, valor_cobrado, endereco_entrega) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
             var ps = con.prepareStatement(sql, new String[] { "id" });
@@ -37,10 +37,12 @@ public class PedidoRepositoryJDBC implements PedidoRepository {
             ps.setDouble(6, pedido.getImpostos());
             ps.setDouble(7, pedido.getDesconto());
             ps.setDouble(8, pedido.getValorCobrado());
+            ps.setString(9, pedido.getEnderecoEntrega());
             return ps;
         }, keyHolder);
 
         long idGerado = keyHolder.getKey().longValue();
+        pedido.setId(idGerado);
 
         for (ItemPedido item : pedido.getItens()) {
             jdbcTemplate.update(

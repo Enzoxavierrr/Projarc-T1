@@ -66,6 +66,28 @@ create table if not exists cardapio_produto (
 
 --tabela config
 create table if not exists config(
-  chave varchar(50) primary key,
-  valor varchar(100) not null
-)
+  nome_cardapio varchar(50) primary key,
+  cardapio_ativo varchar(100) not null
+);
+
+--tabela de pedidos
+create table if not exists pedidos (
+    id int primary key auto_increment,
+    cliente_cpf varchar(15) not null,
+    data_criacao timestamp,
+    data_hora_pagamento timestamp,
+    status varchar(20) not null,
+    valor double not null,
+    impostos double not null,
+    desconto double not null,
+    valor_cobrado double not null,
+    foreign key (cliente_cpf) references clientes(cpf)
+);
+
+-- tabela de itens do pedido
+create table if not exists itens_pedido (
+    id int primary key auto_increment,
+    pedido_id int not null references pedidos(id),
+    produto_id int not null references produtos(id),
+    quantidade int not null
+);
