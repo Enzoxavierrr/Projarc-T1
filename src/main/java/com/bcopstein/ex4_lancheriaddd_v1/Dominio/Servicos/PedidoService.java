@@ -17,40 +17,29 @@ public class PedidoService {
     private IImpostoService impostoService;
     private IEstoqueService estoqueService;
 
-
     @Autowired
-        public PedidoService(PedidoRepository pedidoRepository, IDescontoService descontoService,
-            IImpostoService impostoService, IEstoqueService estoqueService){
-            this.pedidoRepository = pedidoRepository;
-            this.descontoService = descontoService;
-            this.impostoService = impostoService;
-            this.estoqueService = estoqueService;  
+    public PedidoService(PedidoRepository pedidoRepository, IDescontoService descontoService,
+            IImpostoService impostoService, IEstoqueService estoqueService) {
+        this.pedidoRepository = pedidoRepository;
+        this.descontoService = descontoService;
+        this.impostoService = impostoService;
+        this.estoqueService = estoqueService;
+    }
+
+    public ResultadoPedido processarPedido(Pedido pedido) {
+        List<ItemPedido> itensIndisponiveis = estoqueService.verificarEstoque(pedido.getItens());
+        if (!itensIndisponiveis.isEmpty()) {
+            pedido.reprovar();
+            return new ResultadoPedido(pedido, itensIndisponiveis);
         }
 
-        public ResultadoPedido processarPedido(Pedido pedido){
-            //verificar estoque
-            List<ItemPedido> itensIndisponiveis = estoqueService.verificarEstoque(pedido.getItens());
-            if(!itensIndisponiveis.isEmpty()){
-                pedido.setStatus(Pedido.Status.REPROVADO);
-                return new ResultadoPedido(pedido, itensIndisponiveis);
-            }
+        double subtotal = pedido.calcularSubtotal();
+        double desconto = descontoService.calcularDesconto(pedido.getCliente(), subtotal);
+        double imposto = impostoService.calcularImposto(subtotal);
 
-            double subtotal = pedido.getItens().stream()
-                .mapToDouble(item -> item.getItem().getPreco() * item.getQuantidade())
-                .sum();
+        pedido.aprovar(desconto, imposto);
 
-            double desconto = descontoService.calcularDesconto(pedido.getCliente(), subtotal);
-            double imposto = impostoService.calcularImposto(subtotal);
-            double valorCobrado = subtotal - desconto + imposto;
-
-            pedido.setStatus(Pedido.Status.APROVADO);
-            pedido.setValor(subtotal);
-            pedido.setImpostos(imposto);
-            pedido.setDesconto(desconto);
-            pedido.setValorCobrado(valorCobrado);
-
-            //salvar pedido
-            return new ResultadoPedido(pedidoRepository.salvar(pedido), List.of());
-        }
+        return new ResultadoPedido(pedidoRepository.salvar(pedido), List.of());
+    }
 
 }
