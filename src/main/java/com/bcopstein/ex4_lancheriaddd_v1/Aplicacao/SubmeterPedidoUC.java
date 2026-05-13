@@ -13,7 +13,6 @@ import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Cliente;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.ItemPedido;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Pedido;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Produto;
-import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.ResultadoPedido;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos.PedidoService;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos.ResultadoPedido;
 

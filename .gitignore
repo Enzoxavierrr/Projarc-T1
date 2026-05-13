@@ -1,3 +1,27 @@
-/target/
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### IDEs e Editores ###
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+*.code-workspace
+.classpath
+.project
+.settings/
+.factorypath
+.apt_generated
+out/
+bin/
+
+### Mac OS ###
+.DS_Store
+
+### Outros ###
+*.log
 *.class
-/.mvn/
+HELP.md
