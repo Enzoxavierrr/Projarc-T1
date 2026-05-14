@@ -7,37 +7,37 @@ import org.springframework.stereotype.Component;
 
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Requests.SubmeterPedidoRequest;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.PedidoResponse;
-import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Dados.ClienteRepository;
-import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Dados.ProdutosRepository;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Cliente;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.ItemPedido;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Pedido;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Produto;
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos.ClienteService;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos.PedidoService;
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos.ProdutoService;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos.ResultadoPedido;
 
-@Component
+@Component  
 public class SubmeterPedidoUC {
     private PedidoService pedidoService;
-    private ClienteRepository clienteRepository;
-    private ProdutosRepository produtosRepository;
+    private ClienteService clienteService;
+    private ProdutoService produtoService;
 
     @Autowired
     public SubmeterPedidoUC(PedidoService pedidoService,
-                            ClienteRepository clienteRepository,
-                            ProdutosRepository produtosRepository) {
+                            ClienteService clienteService,
+                            ProdutoService produtoService) {
         this.pedidoService = pedidoService;
-        this.clienteRepository = clienteRepository;
-        this.produtosRepository = produtosRepository;
+        this.clienteService = clienteService;
+        this.produtoService = produtoService;
     }
 
     public PedidoResponse run(SubmeterPedidoRequest request) {
 
-        Cliente cliente = clienteRepository.buscarPorCpf(request.getClienteCpf());
+        Cliente cliente = clienteService.buscarPorCpf(request.getClienteCpf());
 
         List<ItemPedido> itens = request.getItens().stream()
             .map(itemReq -> {
-                Produto produto = produtosRepository.recuperaProdutoPorid(itemReq.getProdutoId());
+                Produto produto = produtoService.recuperaProdutoPorId(itemReq.getProdutoId());
                 return new ItemPedido(produto, itemReq.getQuantidade());
             })
             .toList();
