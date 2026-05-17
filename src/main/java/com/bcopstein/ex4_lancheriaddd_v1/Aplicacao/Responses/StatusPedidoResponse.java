@@ -6,9 +6,9 @@ public class StatusPedidoResponse {
     private long id;
     private String status;
 
-    public StatusPedidoResponse(Pedido pedido) {
-        this.id = pedido.getId();
-        this.status = pedido.getStatus().name();
+    public StatusPedidoResponse(long id, Pedido.Status status) {
+        this.id = id;
+        this.status = status.name();
     }
 
     public long getId() { return id; }

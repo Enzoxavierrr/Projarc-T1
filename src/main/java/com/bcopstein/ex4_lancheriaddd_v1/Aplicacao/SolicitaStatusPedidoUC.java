@@ -16,7 +16,7 @@ public class SolicitaStatusPedidoUC {
     }
 
     public StatusPedidoResponse run(long id) {
-        Pedido pedido = pedidoService.findById(id);
-        return new StatusPedidoResponse(pedido);
+        Pedido.Status status = pedidoService.buscaStatusPorId(id);
+        return new StatusPedidoResponse(id, status);
     }
 }

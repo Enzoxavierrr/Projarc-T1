@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Dados.PedidoRepository;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.ItemPedido;
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.PedidoNaoEncontradoException;
 
 @Service
 public class PedidoService {
@@ -42,8 +43,9 @@ public class PedidoService {
         return new ResultadoPedido(pedidoRepository.salvar(pedido), List.of());
     }
 
-    public Pedido findById(long id) {
-        return pedidoRepository.findById(id);
+    public Pedido.Status buscaStatusPorId(long id) {
+        return pedidoRepository.buscaStatusPorId(id)
+                .orElseThrow(() -> new PedidoNaoEncontradoException(id));
     }
 
 }

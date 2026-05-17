@@ -1,6 +1,7 @@
 package com.bcopstein.ex4_lancheriaddd_v1.Adaptadores.Dados;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -58,16 +59,14 @@ public class PedidoRepositoryJDBC implements PedidoRepository {
     }
 
     @Override
-    public Pedido findById(long id) {
-        String sql = "SELECT id, status FROM pedidos WHERE id = ?";
+    public Optional<Pedido.Status> buscaStatusPorId(long id) {
+        String sql = "SELECT status FROM pedidos WHERE id = ?";
         return jdbcTemplate.query(
                 sql,
                 ps -> ps.setLong(1, id),
                 rs -> {
-                    if (!rs.next()) return null;
-                    long pedidoId = rs.getLong("id");
-                    Pedido.Status status = Pedido.Status.valueOf(rs.getString("status"));
-                    return new Pedido(pedidoId, null, null, null, status, 0, 0, 0, 0, null);
+                    if (!rs.next()) return Optional.<Pedido.Status>empty();
+                    return Optional.of(Pedido.Status.valueOf(rs.getString("status")));
                 });
     }
 
