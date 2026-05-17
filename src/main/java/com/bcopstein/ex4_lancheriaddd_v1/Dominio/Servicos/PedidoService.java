@@ -17,65 +17,65 @@ import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.ItemPedido;
 
 @Service
 public class PedidoService implements IPedidoService {
-    private PedidoRepository pedidoRepository;
-    private IDescontoService descontoService;
-    private IImpostoService impostoService;
-    private IEstoqueService estoqueService;
+private PedidoRepository pedidoRepository;
+private IDescontoService descontoService;
+private IImpostoService impostoService;
+private IEstoqueService estoqueService;
 
 
-    @Autowired
-        public PedidoService(PedidoRepository pedidoRepository, IDescontoService descontoService,
-            IImpostoService impostoService, IEstoqueService estoqueService){
-            this.pedidoRepository = pedidoRepository;
-            this.descontoService = descontoService;
-            this.impostoService = impostoService;
-            this.estoqueService = estoqueService;  
+@Autowired
+    public PedidoService(PedidoRepository pedidoRepository, IDescontoService descontoService,
+        IImpostoService impostoService, IEstoqueService estoqueService){
+        this.pedidoRepository = pedidoRepository;
+        this.descontoService = descontoService;
+        this.impostoService = impostoService;
+        this.estoqueService = estoqueService;  
+    }
+
+public ResultadoPedido processarPedido(Pedido pedido){
+        List<ItemPedido> itensIndisponiveis = estoqueService.verificarEstoque(pedido.getItens());
+        if(!itensIndisponiveis.isEmpty()){
+            pedido.setStatus(Pedido.Status.NOVO);
+            return new ResultadoPedido(pedido, itensIndisponiveis);
         }
 
-        public ResultadoPedido processarPedido(Pedido pedido){
-            List<ItemPedido> itensIndisponiveis = estoqueService.verificarEstoque(pedido.getItens());
-            if(!itensIndisponiveis.isEmpty()){
-                pedido.setStatus(Pedido.Status.NOVO);
-                return new ResultadoPedido(pedido, itensIndisponiveis);
-            }
+        double subtotal = pedido.getItens().stream()
+            .mapToDouble(item -> item.getItem().getPreco() * item.getQuantidade())
+            .sum();
 
-            double subtotal = pedido.getItens().stream()
-                .mapToDouble(item -> item.getItem().getPreco() * item.getQuantidade())
-                .sum();
+        double desconto = descontoService.calcularDesconto(pedido.getCliente(), subtotal);
+        double imposto = impostoService.calcularImposto(subtotal);
+        double valorCobrado = subtotal - desconto + imposto;
 
-            double desconto = descontoService.calcularDesconto(pedido.getCliente(), subtotal);
-            double imposto = impostoService.calcularImposto(subtotal);
-            double valorCobrado = subtotal - desconto + imposto;
+        pedido.setStatus(Pedido.Status.APROVADO);
+        pedido.setValor(subtotal);
+        pedido.setImpostos(imposto);
+        pedido.setDesconto(desconto);
+        pedido.setValorCobrado(valorCobrado);
 
-            pedido.setStatus(Pedido.Status.APROVADO);
-            pedido.setValor(subtotal);
-            pedido.setImpostos(imposto);
-            pedido.setDesconto(desconto);
-            pedido.setValorCobrado(valorCobrado);
+        Pedido pedidoSalvo = pedidoRepository.salvar(pedido);
+        return new ResultadoPedido(pedidoSalvo, List.of());
+    }
 
-            Pedido pedidoSalvo = pedidoRepository.salvar(pedido);
-            return new ResultadoPedido(pedidoSalvo, List.of());
+    @Override
+    public Optional<Pedido> buscarPorId(long id) {
+        return pedidoRepository.buscarPorId(id);
+    }
+
+    @Override
+    public void cancelar(long id, String cpf) {
+        Pedido pedido = pedidoRepository.buscarPorId(id)
+            .orElseThrow(() -> new PedidoNaoEncontradoException(id));
+
+        if (!pedido.getCliente().getCpf().equals(cpf)) {
+            throw new PedidoNaoPertenceAoClienteException(id, cpf);
         }
 
-        @Override
-        public Optional<Pedido> buscarPorId(long id) {
-            return pedidoRepository.buscarPorId(id);
+        if (pedido.getStatus() != Pedido.Status.APROVADO) {
+            throw new StatusInvalidoParaCancelamentoException(pedido.getStatus());
         }
 
-        @Override
-        public void cancelar(long id, String cpf) {
-            Pedido pedido = pedidoRepository.buscarPorId(id)
-                .orElseThrow(() -> new PedidoNaoEncontradoException(id));
-
-            if (!pedido.getCliente().getCpf().equals(cpf)) {
-                throw new PedidoNaoPertenceAoClienteException(id, cpf);
-            }
-
-            if (pedido.getStatus() != Pedido.Status.APROVADO) {
-                throw new StatusInvalidoParaCancelamentoException(pedido.getStatus());
-            }
-
-            pedidoRepository.atualizarStatus(id, Pedido.Status.CANCELADO);
-        }
+        pedidoRepository.atualizarStatus(id, Pedido.Status.CANCELADO);
+    }
 
 }
