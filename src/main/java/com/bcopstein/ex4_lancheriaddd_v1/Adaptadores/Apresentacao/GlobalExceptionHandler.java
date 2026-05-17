@@ -11,19 +11,19 @@ import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.StatusInvalidoParaCanc
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
+    // esse é o 404
     @ExceptionHandler(PedidoNaoEncontradoException.class)
     public ResponseEntity<String> handlePedidoNaoEncontrado(PedidoNaoEncontradoException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Pedido não encontrado.");
     }
-
+    // 403 
     @ExceptionHandler(PedidoNaoPertenceAoClienteException.class)
     public ResponseEntity<String> handlePedidoNaoPertenceAoCliente(PedidoNaoPertenceAoClienteException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Pedido não pertence ao cliente autenticado.");
     }
-
+    //400 
     @ExceptionHandler(StatusInvalidoParaCancelamentoException.class)
     public ResponseEntity<String> handleStatusInvalido(StatusInvalidoParaCancelamentoException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Este pedido não pode ser cancelado no status atual.");
     }
 }
