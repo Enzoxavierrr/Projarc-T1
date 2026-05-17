@@ -6,6 +6,8 @@ meta {
 
 post {
   url: {{base_url}}/pedidos/submeter
+  body: json
+  auth: none
 }
 
 headers {
@@ -17,11 +19,7 @@ body:json {
     "clienteCpf": "9001",
     "itens": [
       {
-        "produtoId": 1,
-        "quantidade": 2
-      },
-      {
-        "produtoId": 3,
+        "produtoId": 2,
         "quantidade": 1
       }
     ],
