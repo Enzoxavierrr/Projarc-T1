@@ -1,7 +1,6 @@
 package com.bcopstein.ex4_lancheriaddd_v1.Adaptadores.Dados;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -56,6 +55,20 @@ public class PedidoRepositoryJDBC implements PedidoRepository {
     public int contarPedidosDoClienteDesde(Cliente cliente, LocalDateTime desde) {
         String sql = "SELECT COUNT(*) FROM pedidos WHERE cliente_cpf = ? AND data_criacao >= ?";
         return jdbcTemplate.queryForObject(sql, Integer.class, cliente.getCpf(), desde);
+    }
+
+    @Override
+    public Pedido findById(long id) {
+        String sql = "SELECT id, status FROM pedidos WHERE id = ?";
+        return jdbcTemplate.query(
+                sql,
+                ps -> ps.setLong(1, id),
+                rs -> {
+                    if (!rs.next()) return null;
+                    long pedidoId = rs.getLong("id");
+                    Pedido.Status status = Pedido.Status.valueOf(rs.getString("status"));
+                    return new Pedido(pedidoId, null, null, null, status, 0, 0, 0, 0, null);
+                });
     }
 
 }

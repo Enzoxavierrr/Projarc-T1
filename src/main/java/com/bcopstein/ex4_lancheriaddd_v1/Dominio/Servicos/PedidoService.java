@@ -42,4 +42,8 @@ public class PedidoService {
         return new ResultadoPedido(pedidoRepository.salvar(pedido), List.of());
     }
 
+    public Pedido findById(long id) {
+        return pedidoRepository.findById(id);
+    }
+
 }
