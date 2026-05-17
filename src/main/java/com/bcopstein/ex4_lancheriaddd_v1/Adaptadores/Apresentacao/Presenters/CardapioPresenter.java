@@ -7,10 +7,10 @@ public class CardapioPresenter {
     public class ItemCardapioPresenter{
         private Long id;
         private String descricao;
-        private int preco;
+        private double preco;
         private boolean indicacao;
         
-        public ItemCardapioPresenter(Long id, String descricao, int preco, boolean indicacao) {
+        public ItemCardapioPresenter(Long id, String descricao, double preco, boolean indicacao) {
             this.id = id;
             this.descricao = descricao;
             this.preco = preco;
@@ -25,8 +25,8 @@ public class CardapioPresenter {
             return descricao;
         }
 
-        public int getPreco() {
-            return preco;
+        public double getPreco() {
+            return preco/100.0;
         }
 
         public boolean isIndicacao() {

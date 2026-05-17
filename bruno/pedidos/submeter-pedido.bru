@@ -1,0 +1,28 @@
+meta {
+  name: Submeter Pedido
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/pedidos/submeter
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "clienteCpf": "9001",
+    "itens": [
+      {
+        "produtoId": 2,
+        "quantidade": 1
+      }
+    ],
+    "enderecoEntrega": "Rua das Flores, 100"
+  }
+}
