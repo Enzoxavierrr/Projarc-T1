@@ -58,13 +58,13 @@ public ResultadoPedido processarPedido(Pedido pedido){
 }
 
 
-public Optional<Pedido> buscarPorId(long id) {
-    return pedidoRepository.buscarPorId(id);
+public Optional<Pedido> buscarResumoPorId(long id) {
+    return pedidoRepository.buscarResumoPorId(id);
 }
 
 @Override
 public void cancelar(long id, String cpf) {
-    Pedido pedido = pedidoRepository.buscarPorId(id)
+    Pedido pedido = pedidoRepository.buscarResumoPorId(id)
         .orElseThrow(() -> new PedidoNaoEncontradoException(id));
 
     if (!pedido.getCliente().getCpf().equals(cpf)) {

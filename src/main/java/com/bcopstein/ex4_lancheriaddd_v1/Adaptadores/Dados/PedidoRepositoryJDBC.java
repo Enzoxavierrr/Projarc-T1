@@ -60,7 +60,7 @@ public class PedidoRepositoryJDBC implements PedidoRepository {
     }
 
     @Override
-    public Optional<Pedido> buscarPorId(long id) {
+    public Optional<Pedido> buscarResumoPorId(long id) {
         String sql = "SELECT p.id, p.status, p.valor, p.impostos, p.desconto, p.valor_cobrado, " +
                      "p.data_hora_pagamento, p.endereco_entrega, " +
                      "c.cpf, c.nome, c.celular, c.endereco, c.email " +
@@ -96,7 +96,7 @@ public class PedidoRepositoryJDBC implements PedidoRepository {
         int linhasAfetadas = jdbcTemplate.update("UPDATE pedidos SET status = ? WHERE id = ?", status.name(), id);
         if (linhasAfetadas == 0) {
             throw new PedidoNaoEncontradoException(id); // 404
-
+            // aqui é o throw da excecao, que é tratada no GlobalExceptionHandler
         }
     }
 
