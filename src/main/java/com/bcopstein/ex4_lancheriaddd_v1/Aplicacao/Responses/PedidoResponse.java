@@ -26,9 +26,9 @@ public class PedidoResponse {
 
     public long getId() { return id; }
     public String getStatus() { return status; }
-    public double getValor() { return valor; }
-    public double getDesconto() { return desconto; }
-    public double getImpostos() { return impostos; }
-    public double getValorCobrado() { return valorCobrado; }
+    public double getValor() { return valor/100.0; }
+    public double getDesconto() { return desconto/100.0; }
+    public double getImpostos() { return impostos/100.0; }
+    public double getValorCobrado() { return valorCobrado/100.0; }
     public List<ItemPedido> getItensIndisponiveis() { return itensIndisponiveis; }
 }

@@ -7,6 +7,7 @@ public class Pedido {
     public enum Status {
         NOVO,
         APROVADO,
+        REPROVADO,
         PAGO,
         AGUARDANDO,
         PREPARACAO,
@@ -108,5 +109,23 @@ public class Pedido {
 
     public void setEnderecoEntrega(String enderecoEntrega) {
         this.enderecoEntrega = enderecoEntrega;
+    }
+
+    public double calcularSubtotal() {
+    return itens.stream()
+        .mapToDouble(item -> item.getItem().getPreco() * item.getQuantidade())
+        .sum();
+    }
+
+    public void aprovar(double desconto, double imposto) {
+    this.valor = calcularSubtotal();
+    this.desconto = desconto;
+    this.impostos = imposto;
+    this.valorCobrado = this.valor - desconto + imposto;
+    this.status = Status.APROVADO;
+    }
+
+    public void reprovar() {
+    this.status = Status.REPROVADO;
     }
 }

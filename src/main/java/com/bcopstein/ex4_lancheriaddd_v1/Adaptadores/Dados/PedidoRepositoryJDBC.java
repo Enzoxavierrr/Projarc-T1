@@ -14,6 +14,7 @@ import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Dados.PedidoRepository;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Cliente;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.ItemPedido;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Pedido;
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.PedidoNaoEncontradoException;
 
 @Component
 public class PedidoRepositoryJDBC implements PedidoRepository {
@@ -60,6 +61,18 @@ public class PedidoRepositoryJDBC implements PedidoRepository {
     }
 
     @Override
+    public Optional<Pedido.Status> buscaStatusPorId(long id) {
+        String sql = "SELECT status FROM pedidos WHERE id = ?";
+        return jdbcTemplate.query(
+                sql,
+                ps -> ps.setLong(1, id),
+                rs -> {
+                    if (!rs.next()) return Optional.<Pedido.Status>empty();
+                    return Optional.of(Pedido.Status.valueOf(rs.getString("status")));
+                });
+    }
+
+    @Override
     public Optional<Pedido> buscarResumoPorId(long id) {
         String sql = "SELECT p.id, p.status, p.valor, p.impostos, p.desconto, p.valor_cobrado, " +
                      "p.data_hora_pagamento, p.endereco_entrega, " +
@@ -92,11 +105,10 @@ public class PedidoRepositoryJDBC implements PedidoRepository {
     }
 
     @Override
-    public void atualizarStatus(long id, Pedido.Status status) { // aqui o codigo fala com o banco de dados, mas nao temos controle de erro aqui
+    public void atualizarStatus(long id, Pedido.Status status) {
         int linhasAfetadas = jdbcTemplate.update("UPDATE pedidos SET status = ? WHERE id = ?", status.name(), id);
         if (linhasAfetadas == 0) {
-            throw new PedidoNaoEncontradoException(id); // 404
-            // aqui é o throw da excecao, que é tratada no GlobalExceptionHandler
+            throw new PedidoNaoEncontradoException(id);
         }
     }
 
