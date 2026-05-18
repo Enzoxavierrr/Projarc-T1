@@ -2,6 +2,7 @@ package com.bcopstein.ex4_lancheriaddd_v1.Adaptadores.Dados;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -54,6 +55,35 @@ public class PedidoRepositoryJDBC implements PedidoRepository {
     public int contarPedidosDoClienteDesde(Cliente cliente, LocalDateTime desde) {
         String sql = "SELECT COUNT(*) FROM pedidos WHERE cliente_cpf = ? AND data_criacao >= ?";
         return jdbcTemplate.queryForObject(sql, Integer.class, cliente.getCpf(), desde);
+    }
+
+    @Override
+    public Optional<Pedido> buscarPorId(long id) {
+        String sql = "SELECT p.id, p.status, c.cpf, c.nome, c.celular, c.endereco, c.email " +
+                     "FROM pedidos p JOIN clientes c ON c.cpf = p.cliente_cpf WHERE p.id = ?";
+        List<Pedido> resultado = jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Cliente cliente = new Cliente(
+                rs.getString("cpf"),
+                rs.getString("nome"),
+                rs.getString("celular"),
+                rs.getString("endereco"),
+                rs.getString("email")
+            );
+            return new Pedido(
+                rs.getLong("id"),
+                cliente,
+                null,
+                List.of(),
+                Pedido.Status.valueOf(rs.getString("status")),
+                0, 0, 0, 0
+            );
+        }, id);
+        return resultado.isEmpty() ? Optional.empty() : Optional.of(resultado.get(0));
+    }
+
+    @Override
+    public void atualizarStatus(long id, Pedido.Status status) {
+        jdbcTemplate.update("UPDATE pedidos SET status = ? WHERE id = ?", status.name(), id);
     }
 
 }
