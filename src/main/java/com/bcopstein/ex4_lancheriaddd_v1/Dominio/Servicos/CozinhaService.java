@@ -6,16 +6,21 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.stereotype.Service;
+
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Pedido;
 
+@Service
 public class CozinhaService implements ICozinhaService {
     private Queue<Pedido> filaEntrada;
     private Pedido emPreparacao;
     private Queue<Pedido> filaSaida;
 
     private ScheduledExecutorService scheduler;
+    private IEntregaService entregaService;
 
-    public CozinhaService() {
+    public CozinhaService(IEntregaService entregaService) {
+        this.entregaService = entregaService;
         filaEntrada = new LinkedBlockingQueue<Pedido>();
         emPreparacao = null;
         filaSaida = new LinkedBlockingQueue<Pedido>();
@@ -44,6 +49,7 @@ public class CozinhaService implements ICozinhaService {
         emPreparacao.setStatus(Pedido.Status.PRONTO);
         filaSaida.add(emPreparacao);
         System.out.println("Pedido na fila de saida: "+emPreparacao);
+        entregaService.encaminhar(emPreparacao);
         emPreparacao = null;
         // Se tem pedidos na fila, programa a preparação para daqui a 1 segundo
         if (!filaEntrada.isEmpty()){

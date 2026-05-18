@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.PedidoNaoEncontradoException;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.PedidoNaoPertenceAoClienteException;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.StatusInvalidoParaCancelamentoException;
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.StatusInvalidoParaPagamentoException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -33,5 +34,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(StatusInvalidoParaCancelamentoException.class)
     public ResponseEntity<String> handleStatusInvalido(StatusInvalidoParaCancelamentoException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Este pedido não pode ser cancelado no status atual.");
+    }
+
+    @ExceptionHandler(StatusInvalidoParaPagamentoException.class)
+    public ResponseEntity<String> handleStatusInvalidoPagamento(StatusInvalidoParaPagamentoException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Este pedido não pode ser pago no status atual.");
     }
 }

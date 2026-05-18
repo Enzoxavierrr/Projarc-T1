@@ -16,7 +16,6 @@ import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.RecuperaListaCardapiosUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.RecuperarCardapioUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.CardapioResponse;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Produto;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.CarregarCardapioUC;
 
