@@ -1,13 +1,18 @@
 package com.bcopstein.ex4_lancheriaddd_v1.Adaptadores.Apresentacao;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.CancelarPedidoUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.PagarPedidoUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.SolicitaStatusPedidoUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.SubmeterPedidoUC;
@@ -23,11 +28,17 @@ public class PedidoController {
     private SubmeterPedidoUC submeterPedidoUC;
     private SolicitaStatusPedidoUC solicitaStatusPedidoUC;
     private PagarPedidoUC pagarPedidoUC;
+    private CancelarPedidoUC cancelarPedidoUC;
 
-    public PedidoController(SubmeterPedidoUC submeterPedidoUC, SolicitaStatusPedidoUC solicitaStatusPedidoUC, PagarPedidoUC pagarPedidoUC) {
+    @Autowired
+    public PedidoController(SubmeterPedidoUC submeterPedidoUC,
+                            SolicitaStatusPedidoUC solicitaStatusPedidoUC,
+                            PagarPedidoUC pagarPedidoUC,
+                            CancelarPedidoUC cancelarPedidoUC) {
         this.submeterPedidoUC = submeterPedidoUC;
         this.solicitaStatusPedidoUC = solicitaStatusPedidoUC;
         this.pagarPedidoUC = pagarPedidoUC;
+        this.cancelarPedidoUC = cancelarPedidoUC;
     }
 
     @PostMapping("/submeter")
@@ -46,5 +57,12 @@ public class PedidoController {
     @CrossOrigin("*")
     public PagarPedidoResponse pagar(@PathVariable long id, @RequestBody PagarPedidoRequest request) {
         return pagarPedidoUC.executar(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    @CrossOrigin("*")
+    public ResponseEntity<Void> cancelarPedido(@PathVariable long id, @RequestParam String cpf) {
+        cancelarPedidoUC.executar(id, cpf);
+        return ResponseEntity.noContent().build();
     }
 }
