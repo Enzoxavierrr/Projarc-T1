@@ -24,4 +24,7 @@ bin/
 ### Outros ###
 *.log
 *.class
+/.mvn/
+arthur.maciel002@edu.pucrs.br
+arthur.maciel002@edu.pucrs.br.pub
 HELP.md

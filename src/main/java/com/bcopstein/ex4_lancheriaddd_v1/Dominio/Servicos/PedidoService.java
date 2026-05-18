@@ -1,18 +1,19 @@
 package com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos;
 
-import org.springframework.stereotype.Service;
-
-import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Pedido;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Dados.PedidoRepository;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.ItemPedido;
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Pedido;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.PedidoNaoEncontradoException;
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.PedidoNaoPertenceAoClienteException;
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.StatusInvalidoParaCancelamentoException;
 
 @Service
-public class PedidoService {
+public class PedidoService implements IPedidoService {
     private PedidoRepository pedidoRepository;
     private IDescontoService descontoService;
     private IImpostoService impostoService;
@@ -27,6 +28,7 @@ public class PedidoService {
         this.estoqueService = estoqueService;
     }
 
+    @Override
     public ResultadoPedido processarPedido(Pedido pedido) {
         List<ItemPedido> itensIndisponiveis = estoqueService.verificarEstoque(pedido.getItens());
         if (!itensIndisponiveis.isEmpty()) {
@@ -48,4 +50,19 @@ public class PedidoService {
                 .orElseThrow(() -> new PedidoNaoEncontradoException(id));
     }
 
+    @Override
+    public void cancelar(long id, String cpf) {
+        Pedido pedido = pedidoRepository.buscarResumoPorId(id)
+            .orElseThrow(() -> new PedidoNaoEncontradoException(id));
+
+        if (!pedido.getCliente().getCpf().equals(cpf)) {
+            throw new PedidoNaoPertenceAoClienteException(id, cpf);
+        }
+
+        if (pedido.getStatus() != Pedido.Status.APROVADO) {
+            throw new StatusInvalidoParaCancelamentoException(pedido.getStatus());
+        }
+
+        pedidoRepository.atualizarStatus(id, Pedido.Status.CANCELADO);
+    }
 }

@@ -1,6 +1,7 @@
 package com.bcopstein.ex4_lancheriaddd_v1.Adaptadores.Dados;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Dados.PedidoRepository;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Cliente;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.ItemPedido;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Pedido;
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.PedidoNaoEncontradoException;
 
 @Component
 public class PedidoRepositoryJDBC implements PedidoRepository {
@@ -68,6 +70,46 @@ public class PedidoRepositoryJDBC implements PedidoRepository {
                     if (!rs.next()) return Optional.<Pedido.Status>empty();
                     return Optional.of(Pedido.Status.valueOf(rs.getString("status")));
                 });
+    }
+
+    @Override
+    public Optional<Pedido> buscarResumoPorId(long id) {
+        String sql = "SELECT p.id, p.status, p.valor, p.impostos, p.desconto, p.valor_cobrado, " +
+                     "p.data_hora_pagamento, p.endereco_entrega, " +
+                     "c.cpf, c.nome, c.celular, c.endereco, c.email " +
+                     "FROM pedidos p JOIN clientes c ON p.cliente_cpf = c.cpf " +
+                     "WHERE p.id = ?";
+        List<Pedido> resultado = jdbcTemplate.query(
+            sql,
+            ps -> ps.setLong(1, id),
+            (rs, rowNum) -> new Pedido(
+                rs.getLong("id"),
+                new Cliente(
+                    rs.getString("cpf"),
+                    rs.getString("nome"),
+                    rs.getString("celular"),
+                    rs.getString("endereco"),
+                    rs.getString("email")
+                ),
+                rs.getObject("data_hora_pagamento", LocalDateTime.class),
+                List.of(),
+                Pedido.Status.valueOf(rs.getString("status")),
+                rs.getDouble("valor"),
+                rs.getDouble("impostos"),
+                rs.getDouble("desconto"),
+                rs.getDouble("valor_cobrado"),
+                rs.getString("endereco_entrega")
+            )
+        );
+        return resultado.isEmpty() ? Optional.empty() : Optional.of(resultado.getFirst());
+    }
+
+    @Override
+    public void atualizarStatus(long id, Pedido.Status status) {
+        int linhasAfetadas = jdbcTemplate.update("UPDATE pedidos SET status = ? WHERE id = ?", status.name(), id);
+        if (linhasAfetadas == 0) {
+            throw new PedidoNaoEncontradoException(id);
+        }
     }
 
 }
