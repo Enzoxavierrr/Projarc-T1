@@ -11,6 +11,7 @@ import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Pedido;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.PedidoNaoEncontradoException;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.PedidoNaoPertenceAoClienteException;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.StatusInvalidoParaCancelamentoException;
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.StatusInvalidoParaPagamentoException;
 
 @Service
 public class PedidoService implements IPedidoService {
@@ -48,6 +49,24 @@ public class PedidoService implements IPedidoService {
     public Pedido.Status buscaStatusPorId(long id) {
         return pedidoRepository.buscaStatusPorId(id)
                 .orElseThrow(() -> new PedidoNaoEncontradoException(id));
+    }
+
+    @Override
+    public Pedido pagar(long id, String cpf) {
+        Pedido pedido = pedidoRepository.buscarResumoPorId(id)
+                .orElseThrow(() -> new PedidoNaoEncontradoException(id));
+
+        if (!pedido.getCliente().getCpf().equals(cpf)) {
+            throw new PedidoNaoPertenceAoClienteException(id, cpf);
+        }
+
+        if (pedido.getStatus() != Pedido.Status.APROVADO) {
+            throw new StatusInvalidoParaPagamentoException(pedido.getStatus());
+        }
+
+        pedidoRepository.atualizarStatus(id, Pedido.Status.PAGO);
+        pedido.setStatus(Pedido.Status.PAGO);
+        return pedido;
     }
 
     @Override
