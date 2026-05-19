@@ -32,7 +32,7 @@ public class PedidoService implements IPedidoService {
         List<ItemPedido> itensIndisponiveis = estoqueService.verificarEstoque(pedido.getItens());
         if (!itensIndisponiveis.isEmpty()) {
             pedido.reprovar();
-            return new ResultadoPedido(pedido, itensIndisponiveis);
+            return new ResultadoPedido(pedidoRepository.salvar(pedido), itensIndisponiveis);
         }
 
         double subtotal = pedido.calcularSubtotal();
