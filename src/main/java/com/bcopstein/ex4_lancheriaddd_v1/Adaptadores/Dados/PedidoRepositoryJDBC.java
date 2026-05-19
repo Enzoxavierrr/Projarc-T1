@@ -41,7 +41,9 @@ public class PedidoRepositoryJDBC implements PedidoRepository {
             return ps;
         }, keyHolder);
 
-        long idGerado = keyHolder.getKey().longValue();
+        Number key = keyHolder.getKey();
+        if (key == null) throw new IllegalStateException("Nenhum ID gerado pelo banco");
+        long idGerado = key.longValue();
         pedido.setId(idGerado);
 
         for (ItemPedido item : pedido.getItens()) {
@@ -55,7 +57,8 @@ public class PedidoRepositoryJDBC implements PedidoRepository {
     @Override
     public int contarPedidosDoClienteDesde(Cliente cliente, LocalDateTime desde) {
         String sql = "SELECT COUNT(*) FROM pedidos WHERE cliente_cpf = ? AND data_criacao >= ?";
-        return jdbcTemplate.queryForObject(sql, Integer.class, cliente.getCpf(), desde);
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, cliente.getCpf(), desde);
+        return count != null ? count : 0;
     }
 
     @Override
