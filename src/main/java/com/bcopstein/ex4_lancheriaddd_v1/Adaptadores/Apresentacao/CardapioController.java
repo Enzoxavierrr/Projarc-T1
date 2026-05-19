@@ -10,6 +10,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import com.bcopstein.ex4_lancheriaddd_v1.Adaptadores.Apresentacao.Presenters.CabecalhoCardapioPresenter;
 import com.bcopstein.ex4_lancheriaddd_v1.Adaptadores.Apresentacao.Presenters.CardapioPresenter;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.RecuperaListaCardapiosUC;
@@ -21,6 +25,7 @@ import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.CarregarCardapioUC;
 
 
 
+@Tag(name = "Cardápio", description = "UC3 - Consulta de cardápios disponíveis")
 @RestController
 @RequestMapping("/cardapio")
 public class CardapioController {
@@ -36,9 +41,10 @@ public class CardapioController {
         this.carregarCardapioUC = carregarCardapioUC;
     }
 
+    @Operation(summary = "Buscar cardápio por ID", description = "Retorna os produtos de um cardápio específico pelo seu ID")
     @GetMapping("/{id}")
     @CrossOrigin("*")
-    public CardapioPresenter recuperaCardapio(@PathVariable(value="id")long id){
+    public CardapioPresenter recuperaCardapio(@Parameter(description = "ID do cardápio") @PathVariable(value="id")long id){
         CardapioResponse cardapioResponse = recuperaCardapioUC.run(id);
         Set<Long> conjIdSugestoes = new HashSet<>(cardapioResponse.getSugestoesDoChef().stream()
             .map(produto->produto.getId())
@@ -51,6 +57,7 @@ public class CardapioController {
         return cardapioPresenter;
     }
 
+    @Operation(summary = "Listar todos os cardápios", description = "Retorna a lista com os cabeçalhos (id e título) de todos os cardápios cadastrados")
     @GetMapping("/lista")
     @CrossOrigin("*")
     public List<CabecalhoCardapioPresenter> recuperaListaCardapios(){
@@ -61,17 +68,15 @@ public class CardapioController {
          return lstCardapios;
     }
 
+    @Operation(summary = "Carregar cardápio corrente", description = "Retorna o cardápio ativo no momento, conforme configurado no banco de dados")
     @GetMapping("/corrente")
-    @CrossOrigin("*") 
-    //CrossOrigin é necessário para permitir que o frontend acesse 
-    // este endpoint mesmo que esteja em um domínio diferente, 
-    // o que é comum durante o desenvolvimento
+    @CrossOrigin("*")
     public CardapioPresenter carregarCardapio() {
         CardapioResponse cardapioResponse = carregarCardapioUC.run();      
         Set<Long> conjIdSugestoes = new HashSet<>(cardapioResponse.getSugestoesDoChef()
             .stream()
             .map(p -> p.getId())
-            .toList());     
+            .toList());
         
         CardapioPresenter presenter = new CardapioPresenter(
             cardapioResponse.getCardapio().getCabecalhoCardapio().titulo()
