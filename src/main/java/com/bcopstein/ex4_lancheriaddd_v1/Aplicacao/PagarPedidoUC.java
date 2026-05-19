@@ -1,6 +1,5 @@
 package com.bcopstein.ex4_lancheriaddd_v1.Aplicacao;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Requests.PagarPedidoRequest;
@@ -16,7 +15,6 @@ public class PagarPedidoUC {
     private IPagamentoService pagamentoService;
     private ICozinhaService cozinhaService;
 
-    @Autowired
     public PagarPedidoUC(PedidoService pedidoService, IPagamentoService pagamentoService, ICozinhaService cozinhaService) {
         this.pedidoService = pedidoService;
         this.pagamentoService = pagamentoService;

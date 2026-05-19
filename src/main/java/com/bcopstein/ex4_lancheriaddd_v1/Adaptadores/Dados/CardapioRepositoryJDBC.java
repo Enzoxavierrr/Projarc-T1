@@ -2,7 +2,6 @@ package com.bcopstein.ex4_lancheriaddd_v1.Adaptadores.Dados;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +16,6 @@ public class CardapioRepositoryJDBC implements CardapioRepository{
     private JdbcTemplate jdbcTemplate;
     private ProdutosRepository produtosRepository;
 
-    @Autowired
     public CardapioRepositoryJDBC(JdbcTemplate jdbcTemplate,ProdutosRepository  produtosRepository){
         this.jdbcTemplate = jdbcTemplate;
         this.produtosRepository = produtosRepository;

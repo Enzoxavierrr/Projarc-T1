@@ -1,6 +1,5 @@
 package com.bcopstein.ex4_lancheriaddd_v1.Aplicacao;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.util.List;
 
@@ -14,7 +13,6 @@ import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos.CardapioService;
 public class CarregarCardapioUC {
     private CardapioService cardapioService;
 
-    @Autowired // Anotação para indicar que o Spring deve injetar a dependência do CardapioService
     public CarregarCardapioUC(CardapioService cardapioService){
         this.cardapioService = cardapioService;
     }   

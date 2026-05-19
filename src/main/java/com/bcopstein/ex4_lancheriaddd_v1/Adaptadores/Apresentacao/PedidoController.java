@@ -1,6 +1,5 @@
 package com.bcopstein.ex4_lancheriaddd_v1.Adaptadores.Apresentacao;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,7 +29,6 @@ public class PedidoController {
     private PagarPedidoUC pagarPedidoUC;
     private CancelarPedidoUC cancelarPedidoUC;
 
-    @Autowired
     public PedidoController(SubmeterPedidoUC submeterPedidoUC,
                             SolicitaStatusPedidoUC solicitaStatusPedidoUC,
                             PagarPedidoUC pagarPedidoUC,

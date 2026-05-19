@@ -2,7 +2,6 @@ package com.bcopstein.ex4_lancheriaddd_v1.Adaptadores.Dados;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +16,6 @@ public class ProdutosRepositoryJDBC implements ProdutosRepository {
     private JdbcTemplate jdbcTemplate;
     private ReceitasRepository receitasRepository;
 
-    @Autowired
     public ProdutosRepositoryJDBC(JdbcTemplate jdbcTemplate,ReceitasRepository receitasRepository){
         this.jdbcTemplate = jdbcTemplate;
         this.receitasRepository = receitasRepository;

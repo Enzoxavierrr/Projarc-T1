@@ -1,0 +1,11 @@
+meta {
+  name: Pedido - Cancel
+  type: http
+  seq: 2
+}
+
+delete {
+  url: http://localhost:8080/pedidos/1?cpf=12345678900
+  body: none
+  auth: none
+}

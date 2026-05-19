@@ -3,7 +3,6 @@ package com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Dados.PedidoRepository;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Cliente;
@@ -13,7 +12,6 @@ public class DescontoService implements IDescontoService {
     private PedidoRepository pedidoRepository;
 
 
-    @Autowired
         public DescontoService(PedidoRepository pedidoRepository){
             this.pedidoRepository = pedidoRepository;
         }

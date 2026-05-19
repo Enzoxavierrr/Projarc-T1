@@ -1,6 +1,5 @@
 package com.bcopstein.ex4_lancheriaddd_v1.Aplicacao;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos.PedidoService;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.StatusPedidoResponse;
@@ -10,7 +9,6 @@ import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Pedido;
 public class SolicitaStatusPedidoUC {
     private PedidoService pedidoService;
 
-    @Autowired
     public SolicitaStatusPedidoUC(PedidoService pedidoService) {
         this.pedidoService = pedidoService;
     }

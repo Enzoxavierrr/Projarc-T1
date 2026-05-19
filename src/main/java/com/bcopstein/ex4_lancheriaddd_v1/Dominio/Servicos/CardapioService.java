@@ -3,7 +3,6 @@ package com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Dados.CardapioRepository;
@@ -15,7 +14,6 @@ import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Produto;
 public class CardapioService {
     private CardapioRepository cardapioRepository;
 
-    @Autowired
     public CardapioService(CardapioRepository cardapioRepository){
         this.cardapioRepository = cardapioRepository;
     }

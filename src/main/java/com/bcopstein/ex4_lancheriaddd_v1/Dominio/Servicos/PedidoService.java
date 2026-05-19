@@ -2,7 +2,6 @@ package com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Dados.PedidoRepository;
@@ -20,7 +19,6 @@ public class PedidoService implements IPedidoService {
     private IImpostoService impostoService;
     private IEstoqueService estoqueService;
 
-    @Autowired
     public PedidoService(PedidoRepository pedidoRepository, IDescontoService descontoService,
             IImpostoService impostoService, IEstoqueService estoqueService) {
         this.pedidoRepository = pedidoRepository;

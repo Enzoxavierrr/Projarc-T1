@@ -2,7 +2,6 @@ package com.bcopstein.ex4_lancheriaddd_v1.Aplicacao;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Requests.SubmeterPedidoRequest;
@@ -22,7 +21,6 @@ public class SubmeterPedidoUC {
     private ClienteService clienteService;
     private ProdutoService produtoService;
 
-    @Autowired
     public SubmeterPedidoUC(PedidoService pedidoService,
                             ClienteService clienteService,
                             ProdutoService produtoService) {

@@ -1,6 +1,5 @@
 package com.bcopstein.ex4_lancheriaddd_v1.Adaptadores.Dados;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import java.util.List;
 
@@ -13,7 +12,6 @@ import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Cliente;
 public class ClienteRepositoryJDBC implements ClienteRepository {
     private JdbcTemplate jdbcTemplate;
 
-    @Autowired
     public ClienteRepositoryJDBC(JdbcTemplate jdbcTemplate){
         this.jdbcTemplate = jdbcTemplate;
     }

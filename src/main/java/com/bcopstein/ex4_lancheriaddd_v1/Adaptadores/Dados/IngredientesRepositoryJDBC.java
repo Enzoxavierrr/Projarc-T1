@@ -2,7 +2,6 @@ package com.bcopstein.ex4_lancheriaddd_v1.Adaptadores.Dados;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -13,7 +12,6 @@ import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Ingrediente;
 public class IngredientesRepositoryJDBC implements IngredientesRepository{
     private JdbcTemplate jdbcTemplate;
 
-    @Autowired
     public IngredientesRepositoryJDBC(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
