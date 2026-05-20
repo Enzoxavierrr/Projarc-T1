@@ -23,8 +23,8 @@ public class GlobalExceptionHandler {
                 "status", HttpStatus.NOT_FOUND.value(),
                 "error", "Not Found",
                 "message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
-    }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body); 
+    } // aqui as exececoes de dominio sao capturadas centralizadamente aqui no GlobalExceptionHandler. 
 
     @ExceptionHandler(PedidoNaoPertenceAoClienteException.class)
     public ResponseEntity<String> handlePedidoNaoPertenceAoCliente(PedidoNaoPertenceAoClienteException ex) {

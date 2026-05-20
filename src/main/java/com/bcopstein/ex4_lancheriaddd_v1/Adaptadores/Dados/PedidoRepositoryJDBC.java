@@ -71,7 +71,7 @@ public class PedidoRepositoryJDBC implements PedidoRepository {
                     if (!rs.next()) return Optional.<Pedido.Status>empty();
                     return Optional.of(Pedido.Status.valueOf(rs.getString("status")));
                 });
-    }
+    } // aqui o repo faz apenas a query no banco. Repara que ele retorna um optional - se não achar nd, devolve um empty() e o serviço de dominio trata a excecao.
 
     @Override
     public Optional<Pedido> buscarResumoPorId(long id) {

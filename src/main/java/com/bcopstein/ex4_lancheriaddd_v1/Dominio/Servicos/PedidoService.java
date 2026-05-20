@@ -47,7 +47,9 @@ public class PedidoService implements IPedidoService {
     public Pedido.Status buscaStatusPorId(long id) {
         return pedidoRepository.buscaStatusPorId(id)
                 .orElseThrow(() -> new PedidoNaoEncontradoException(id));
-    }
+    } 
+    // o servico de dominio pergunta ao repo, se o pedido existir, lanca uma execao de dominio - pedidonaoEncontrado - que é tratado na camada de apresnetacao.
+    
 
     @Override
     public Pedido pagar(long id, String cpf) {

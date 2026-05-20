@@ -16,5 +16,5 @@ public class SolicitaStatusPedidoUC {
     public StatusPedidoResponse run(long id) {
         Pedido.Status status = pedidoService.buscaStatusPorId(id);
         return new StatusPedidoResponse(id, status);
-    }
+    } //delega para o serviço de dominio buscar o status e monta a resposta. Cada camada faz só o que é responsavilidade dela.
 }
