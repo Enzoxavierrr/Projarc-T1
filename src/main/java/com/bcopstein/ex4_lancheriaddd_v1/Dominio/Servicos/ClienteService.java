@@ -3,9 +3,11 @@ package com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos;
 import org.springframework.stereotype.Service;
 
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Requests.RegistrarClienteRequest;
+import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.RegistrarClienteResponse;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Dados.ClienteRepository;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Cliente;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.ClienteJaCadastradoException;
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.CpfInvalidoException;
 
 @Service
 public class ClienteService {
@@ -19,7 +21,12 @@ public class ClienteService {
         return clienteRepository.buscarPorCpf(cpf);
     }
 
-    public void registrar(RegistrarClienteRequest request) {
+    public RegistrarClienteResponse registrar(RegistrarClienteRequest request) {
+        // valida formato do CPF: apenas dígitos e exatamente 11 caracteres
+        if (!request.cpf().matches("\\d{11}")) {
+            throw new CpfInvalidoException(request.cpf());
+        }
+
         if (clienteRepository.buscarPorCpf(request.cpf()) != null) {
             throw new ClienteJaCadastradoException("CPF", request.cpf());
         }
@@ -36,5 +43,9 @@ public class ClienteService {
             request.senha()
         );
         clienteRepository.salvar(novoCliente);
+
+        return new RegistrarClienteResponse(
+            "Usuario @" + request.nome() + " cadastrado com sucesso."
+        );
     }
 }

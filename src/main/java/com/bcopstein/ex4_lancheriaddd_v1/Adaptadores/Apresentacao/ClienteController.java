@@ -14,50 +14,48 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.RegistrarclienteUC;
+import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.RegistrarClienteUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Requests.RegistrarClienteRequest;
+import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.RegistrarClienteResponse;
 
 @Tag(name = "Clientes", description = "UC1 e UC2 - Cadastro e autenticação de clientes")
 @RestController
 @RequestMapping("/clientes")
 public class ClienteController {
-    private RegistrarclienteUC registrarclienteUC;
+    private RegistrarClienteUC registrarClienteUC;
 
-
-    public ClienteController(RegistrarclienteUC registrarclienteUC) {
-        this.registrarclienteUC = registrarclienteUC;
+    public ClienteController(RegistrarClienteUC registrarClienteUC) {
+        this.registrarClienteUC = registrarClienteUC;
     }
 
     @Operation(
-            summary = "Registrar cliente (UC1)",
-            description = "Cadastra um novo cliente no sistema. CPF e e-mail devem ser únicos.",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                content = @Content(
-                    mediaType = "application/json",
-                    examples = @ExampleObject(value = """
-                        {
-                          "cpf": "12345678900",
-                          "nome": "João Silva",
-                          "email": "joao@email.com",
-                          "senha": "minhasenha123",
-                          "celular": "51999999999",
-                          "endereco": "Rua das Flores, 100"
-                        }
-                        """)
-                )
-            ),
-            responses = {
-                @ApiResponse(responseCode = "201", description = "Cliente registrado com sucesso"),
-                @ApiResponse(responseCode = "409", description = "CPF ou e-mail já cadastrado")
-            }
-        )
-
-
-        @PostMapping("/registrar")
-        @ResponseStatus(HttpStatus.CREATED)
-        @CrossOrigin("*")
-    public void registrarCliente(@RequestBody RegistrarClienteRequest request) {
-        registrarclienteUC.executar(request);
+        summary = "Registrar cliente (UC1)",
+        description = "Cadastra um novo cliente no sistema. CPF e e-mail devem ser únicos.",
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            content = @Content(
+                mediaType = "application/json",
+                examples = @ExampleObject(value = """
+                    {
+                      "cpf": "12345678900",
+                      "nome": "João Silva",
+                      "email": "joao@email.com",
+                      "senha": "minhasenha123",
+                      "celular": "51999999999",
+                      "endereco": "Rua das Flores, 100"
+                    }
+                    """)
+            )
+        ),
+        responses = {
+            @ApiResponse(responseCode = "201", description = "Cliente registrado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "CPF inválido (deve ter 11 dígitos)"),
+            @ApiResponse(responseCode = "409", description = "CPF ou e-mail já cadastrado")
+        }
+    )
+    @PostMapping("/registrar")
+    @ResponseStatus(HttpStatus.CREATED)
+    @CrossOrigin("*")
+    public RegistrarClienteResponse registrarCliente(@RequestBody RegistrarClienteRequest request) {
+        return registrarClienteUC.executar(request);
     }
-
 }
