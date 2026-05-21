@@ -2,12 +2,15 @@ package com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos;
 
 import org.springframework.stereotype.Service;
 
+import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Requests.AutenticarRequest;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Requests.RegistrarClienteRequest;
+import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.AutenticarResponse;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.RegistrarClienteResponse;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Dados.ClienteRepository;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Cliente;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.ClienteJaCadastradoException;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.CpfInvalidoException;
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.CredenciaisInvalidasException;
 
 @Service
 public class ClienteService {
@@ -47,5 +50,17 @@ public class ClienteService {
         return new RegistrarClienteResponse(
             "Usuario @" + request.nome() + " cadastrado com sucesso."
         );
+    }
+
+    public AutenticarResponse autenticar(AutenticarRequest request) {
+        
+        Cliente cliente = clienteRepository.buscarPorEmail(request.email());
+
+        // se não encontrou ou a senha não bate → mesma exceção (segurança)
+        if (cliente == null || !cliente.getSenha().equals(request.senha())) {
+            throw new CredenciaisInvalidasException();
+        }
+
+        return new AutenticarResponse(cliente.getCpf());
     }
 }

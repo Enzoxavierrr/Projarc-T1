@@ -14,8 +14,11 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.AutenticarUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.RegistrarClienteUC;
+import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Requests.AutenticarRequest;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Requests.RegistrarClienteRequest;
+import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.AutenticarResponse;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.RegistrarClienteResponse;
 
 @Tag(name = "Clientes", description = "UC1 e UC2 - Cadastro e autenticação de clientes")
@@ -23,9 +26,11 @@ import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.RegistrarClienteRes
 @RequestMapping("/clientes")
 public class ClienteController {
     private RegistrarClienteUC registrarClienteUC;
+    private AutenticarUC autenticarUC;
 
-    public ClienteController(RegistrarClienteUC registrarClienteUC) {
+    public ClienteController(RegistrarClienteUC registrarClienteUC, AutenticarUC autenticarUC) {
         this.registrarClienteUC = registrarClienteUC;
+        this.autenticarUC = autenticarUC;
     }
 
     @Operation(
@@ -57,5 +62,30 @@ public class ClienteController {
     @CrossOrigin("*")
     public RegistrarClienteResponse registrarCliente(@RequestBody RegistrarClienteRequest request) {
         return registrarClienteUC.executar(request);
+    }
+
+    @Operation(
+        summary = "Autenticar cliente (UC2)",
+        description = "Autentica o cliente com email e senha. Retorna o CPF do cliente em caso de sucesso.",
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            content = @Content(
+                mediaType = "application/json",
+                examples = @ExampleObject(value = """
+                    {
+                      "email": "huguinho.pato@email.com",
+                      "senha": "123456"
+                    }
+                    """)
+            )
+        ),
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Autenticado com sucesso, retorna o CPF"),
+            @ApiResponse(responseCode = "401", description = "Email ou senha inválidos")
+        }
+    )
+    @PostMapping("/login")
+    @CrossOrigin("*")
+    public AutenticarResponse login(@RequestBody AutenticarRequest request) {
+        return autenticarUC.executar(request);
     }
 }
