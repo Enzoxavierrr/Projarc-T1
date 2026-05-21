@@ -57,7 +57,8 @@ public Cliente buscarPorCpf(String cpf) {
             rs.getString("nome"),
             rs.getString("celular"),
             rs.getString("endereco"),
-            rs.getString("email")
+            rs.getString("email"),
+            rs.getString("senha")
         )
     );
     return clientes.isEmpty() ? null : clientes.getFirst();
