@@ -61,6 +61,9 @@ public class ClienteService {
             throw new CredenciaisInvalidasException();
         }
 
-        return new AutenticarResponse(cliente.getCpf());
+        return new AutenticarResponse(
+            cliente.getCpf(),
+            "Usuario @" + cliente.getNome() + " logado com sucesso."
+        );
     }
 }
