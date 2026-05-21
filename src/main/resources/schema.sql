@@ -2,10 +2,9 @@ create table if not exists clientes(
   cpf varchar(15) not null primary key,
   nome varchar(100) not null,
   email varchar(255) not null,
-  senha varchar(255) not null
+  senha varchar(255) not null,
   celular varchar(20) not null,
-  endereco varchar(255) not null,
-  
+  endereco varchar(255) not null
 );
 
 create table if not exists ingredientes (
