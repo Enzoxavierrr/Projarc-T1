@@ -14,6 +14,7 @@ import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Pedido;
 @Service
 public class CozinhaService implements ICozinhaService {
     private Queue<Pedido> filaEntrada;
+    private Queue<Pedido> filaPreparacao;
     private Pedido emPreparacao;
     private Queue<Pedido> filaSaida;
 
@@ -25,6 +26,7 @@ public class CozinhaService implements ICozinhaService {
         this.entregaService = entregaService;
         this.pedidoRepository = pedidoRepository;
         filaEntrada = new LinkedBlockingQueue<Pedido>();
+        filaPreparacao = new LinkedBlockingQueue<Pedido>();
         emPreparacao = null;
         filaSaida = new LinkedBlockingQueue<Pedido>();
         scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -44,8 +46,17 @@ public class CozinhaService implements ICozinhaService {
         pedidoRepository.atualizarStatus(p.getId(), Pedido.Status.AGUARDANDO);
         filaEntrada.add(p);
         System.out.println("Pedido na fila de entrada: " + p.getId());
+        scheduler.schedule(() -> liberaParaPreparacao(p), 5, TimeUnit.SECONDS);
+    }
+
+    private synchronized void liberaParaPreparacao(Pedido pedido) {
+        filaEntrada.remove(pedido);
+        filaPreparacao.add(pedido);
         if (emPreparacao == null) {
-            colocaEmPreparacao(filaEntrada.poll());
+            Pedido prox = filaPreparacao.poll();
+            if (prox != null) {
+                colocaEmPreparacao(prox);
+            }
         }
     }
 
@@ -57,9 +68,11 @@ public class CozinhaService implements ICozinhaService {
         System.out.println("Pedido na fila de saida: " + emPreparacao.getId());
         entregaService.encaminhar(emPreparacao);
         emPreparacao = null;
-        if (!filaEntrada.isEmpty()) {
-            Pedido prox = filaEntrada.poll();
-            scheduler.schedule(() -> colocaEmPreparacao(prox), 1, TimeUnit.SECONDS);
+        if (!filaPreparacao.isEmpty()) {
+            Pedido prox = filaPreparacao.poll();
+            if (prox != null) {
+                scheduler.schedule(() -> colocaEmPreparacao(prox), 1, TimeUnit.SECONDS);
+            }
         }
     }
 }
