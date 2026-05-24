@@ -22,6 +22,6 @@ public class PedidoListagemResponse {
     public String getClienteCpf() { return clienteCpf; }
     public String getClienteNome() { return clienteNome; }
     public String getStatus() { return status; }
-    public double getValorCobrado() { return valorCobrado; }
+    public double getValorCobrado() { return valorCobrado / 100.0; }
     public String getEnderecoEntrega() { return enderecoEntrega; }
 }

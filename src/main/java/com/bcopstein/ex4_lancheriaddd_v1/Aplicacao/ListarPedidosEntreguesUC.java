@@ -24,7 +24,7 @@ public class ListarPedidosEntreguesUC {
                 p.getCliente().getCpf(),
                 p.getCliente().getNome(),
                 p.getStatus().name(),
-                p.getValorCobrado() / 100.0,
+                p.getValorCobrado(),
                 p.getEnderecoEntrega()
             ))
             .toList();
