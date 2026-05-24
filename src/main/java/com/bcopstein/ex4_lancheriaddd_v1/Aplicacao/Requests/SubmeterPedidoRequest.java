@@ -14,6 +14,7 @@ public class SubmeterPedidoRequest {
     }
 
     public String getClienteCpf() { return clienteCpf; }
+    public void setClienteCpf(String clienteCpf) { this.clienteCpf = clienteCpf; }
     public List<ItemPedidoRequest> getItens() { return itens; }
     public String getEnderecoEntrega() { return enderecoEntrega; }
 

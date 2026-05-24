@@ -7,7 +7,11 @@ meta {
 post {
   url: {{base_url}}/pedidos/submeter
   body: json
-  auth: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
 }
 
 headers {
@@ -16,7 +20,6 @@ headers {
 
 body:json {
   {
-    "clienteCpf": "12345678900",
     "itens": [
       {
         "produtoId": 2,

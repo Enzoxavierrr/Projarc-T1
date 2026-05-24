@@ -5,13 +5,11 @@ meta {
 }
 
 post {
-  url: http://localhost:8080/pedidos/1/pagar
-  body: json
-  auth: none
+  url: {{base_url}}/pedidos/1/pagar
+  body: none
+  auth: bearer
 }
 
-body:json {
-  {
-    "cpf": "12345678900"
-  }
+auth:bearer {
+  token: {{token}}
 }

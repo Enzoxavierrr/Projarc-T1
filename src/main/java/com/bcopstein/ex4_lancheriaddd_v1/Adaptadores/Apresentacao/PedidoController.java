@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -85,7 +87,10 @@ public class PedidoController {
     )
     @PostMapping("/submeter")
     @CrossOrigin("*")
-    public PedidoResponse submeterPedido(@RequestBody SubmeterPedidoRequest request) {
+    public PedidoResponse submeterPedido(@RequestBody SubmeterPedidoRequest request,
+                                         HttpServletRequest httpRequest) {
+        String cpfAutenticado = (String) httpRequest.getAttribute("cpfAutenticado");
+        request.setClienteCpf(cpfAutenticado);
         return submeterPedidoUC.run(request);
     }
 
@@ -126,7 +131,9 @@ public class PedidoController {
     @PostMapping("/{id}/pagar")
     @CrossOrigin("*")
     public PagarPedidoResponse pagar(@Parameter(description = "ID do pedido") @PathVariable long id,
-                                     @RequestBody PagarPedidoRequest request) {
+                                     HttpServletRequest httpRequest) {
+        String cpfAutenticado = (String) httpRequest.getAttribute("cpfAutenticado");
+        PagarPedidoRequest request = new PagarPedidoRequest(cpfAutenticado);
         return pagarPedidoUC.executar(id, request);
     }
 
@@ -144,8 +151,9 @@ public class PedidoController {
     @CrossOrigin("*")
     public ResponseEntity<Void> cancelarPedido(
             @Parameter(description = "ID do pedido") @PathVariable long id,
-            @Parameter(description = "CPF do cliente dono do pedido") @RequestParam String cpf) {
-        cancelarPedidoUC.executar(id, cpf);
+            HttpServletRequest httpRequest) {
+        String cpfAutenticado = (String) httpRequest.getAttribute("cpfAutenticado");
+        cancelarPedidoUC.executar(id, cpfAutenticado);
         return ResponseEntity.noContent().build();
     }
 
@@ -171,12 +179,13 @@ public class PedidoController {
             @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
         }
     )
-    @GetMapping("/entregues/{cpf}")
+    @GetMapping("/entregues/meus")
     @CrossOrigin("*")
     public List<PedidoListagemResponse> listarEntreguesDoCliente(
-            @Parameter(description = "CPF do cliente") @PathVariable String cpf,
+            HttpServletRequest httpRequest,
             @Parameter(description = "Data inicial (yyyy-MM-dd)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
             @Parameter(description = "Data final (yyyy-MM-dd)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim) {
-        return listarPedidosClienteEntreguesUC.run(cpf, inicio, fim);
+        String cpfAutenticado = (String) httpRequest.getAttribute("cpfAutenticado");
+        return listarPedidosClienteEntreguesUC.run(cpfAutenticado, inicio, fim);
     }
 }

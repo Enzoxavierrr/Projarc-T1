@@ -15,9 +15,11 @@ import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.CredenciaisInvalidasEx
 @Service
 public class ClienteService {
     private ClienteRepository clienteRepository;
+    private AutenticacaoService autenticacaoService;
 
-    public ClienteService(ClienteRepository clienteRepository) {
+    public ClienteService(ClienteRepository clienteRepository, AutenticacaoService autenticacaoService) {
         this.clienteRepository = clienteRepository;
+        this.autenticacaoService = autenticacaoService;
     }
 
     public Cliente buscarPorCpf(String cpf) {
@@ -61,8 +63,11 @@ public class ClienteService {
             throw new CredenciaisInvalidasException();
         }
 
+        String token = autenticacaoService.gerarToken(cliente.getCpf());
+
         return new AutenticarResponse(
             cliente.getCpf(),
+            token,
             "Usuario @" + cliente.getNome() + " logado com sucesso."
         );
     }
