@@ -21,14 +21,14 @@ public class EntregaService implements IEntregaService {
 
     @Override
     public void encaminhar(Pedido pedido) {
-        scheduler.schedule(() -> iniciarTransporte(pedido), 3, TimeUnit.SECONDS);
+        scheduler.schedule(() -> iniciarTransporte(pedido), 4, TimeUnit.SECONDS);
     }
 
     private void iniciarTransporte(Pedido pedido) {
         pedido.setStatus(Pedido.Status.TRANSPORTE);
         pedidoRepository.atualizarStatus(pedido.getId(), Pedido.Status.TRANSPORTE);
         System.out.println("Pedido em transporte: " + pedido.getId());
-        scheduler.schedule(() -> finalizarEntrega(pedido), 3, TimeUnit.SECONDS);
+        scheduler.schedule(() -> finalizarEntrega(pedido), 4, TimeUnit.SECONDS);
     }
 
     private void finalizarEntrega(Pedido pedido) {
