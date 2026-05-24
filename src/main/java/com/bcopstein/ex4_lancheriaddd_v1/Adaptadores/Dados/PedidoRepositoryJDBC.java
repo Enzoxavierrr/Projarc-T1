@@ -1,6 +1,7 @@
 package com.bcopstein.ex4_lancheriaddd_v1.Adaptadores.Dados;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +22,7 @@ public class PedidoRepositoryJDBC implements PedidoRepository {
 
     public PedidoRepositoryJDBC(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+        
     }
 
     @Override
@@ -73,6 +75,15 @@ public class PedidoRepositoryJDBC implements PedidoRepository {
                 });
     } // aqui o repo faz apenas a query no banco. Repara que ele retorna um optional - se não achar nd, devolve um empty() e o serviço de dominio trata a excecao.
 
+
+    @Override
+    public void atualizarStatus(long id, Pedido.Status status) {
+        int linhasAfetadas = jdbcTemplate.update("UPDATE pedidos SET status = ? WHERE id = ?", status.name(), id);
+        if (linhasAfetadas == 0) {
+            throw new PedidoNaoEncontradoException(id);
+        }
+    }
+
     @Override
     public Optional<Pedido> buscarResumoPorId(long id) {
         String sql = "SELECT p.id, p.status, p.valor, p.impostos, p.desconto, p.valor_cobrado, " +
@@ -106,11 +117,38 @@ public class PedidoRepositoryJDBC implements PedidoRepository {
     }
 
     @Override
-    public void atualizarStatus(long id, Pedido.Status status) {
-        int linhasAfetadas = jdbcTemplate.update("UPDATE pedidos SET status = ? WHERE id = ?", status.name(), id);
-        if (linhasAfetadas == 0) {
-            throw new PedidoNaoEncontradoException(id);
-        }
+    public List<Pedido> listarEntreguesEntreDatas(LocalDate inicio, LocalDate fim) {
+        String sql = "SELECT p.id, p.status, p.valor, p.impostos, p.desconto, p.valor_cobrado, " +
+                     "p.data_hora_pagamento, p.data_entrega, p.endereco_entrega, " +
+                     "c.cpf, c.nome, c.celular, c.endereco, c.email " +
+                     "FROM pedidos p JOIN clientes c ON p.cliente_cpf = c.cpf " +
+                     "WHERE p.status = 'ENTREGUE' " +
+                     "AND p.data_entrega >= ? AND p.data_entrega <= ?";
+        return jdbcTemplate.query(
+            sql,
+            ps -> {
+                ps.setObject(1, inicio.atStartOfDay());
+                ps.setObject(2, fim.atTime(23, 59, 59));
+            },
+            (rs, rowNum) -> new Pedido(
+                rs.getLong("id"),
+                new Cliente(
+                    rs.getString("cpf"),
+                    rs.getString("nome"),
+                    rs.getString("celular"),
+                    rs.getString("endereco"),
+                    rs.getString("email")
+                ),
+                rs.getObject("data_hora_pagamento", LocalDateTime.class),
+                List.of(),
+                Pedido.Status.valueOf(rs.getString("status")),
+                rs.getDouble("valor"),
+                rs.getDouble("impostos"),
+                rs.getDouble("desconto"),
+                rs.getDouble("valor_cobrado"),
+                rs.getString("endereco_entrega")
+            )
+        );
     }
 
 }
