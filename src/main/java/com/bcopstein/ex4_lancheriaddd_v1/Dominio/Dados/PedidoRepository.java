@@ -15,4 +15,5 @@ public interface PedidoRepository {
     Optional<Pedido> buscarResumoPorId(long id);
     void atualizarStatus(long id, Pedido.Status status);
     List<Pedido> listarEntreguesEntreDatas(LocalDate inicio, LocalDate fim);
+    List<Pedido> listarEntreguesDoClienteEntreDatas(String cpf, LocalDate inicio, LocalDate fim);
 }

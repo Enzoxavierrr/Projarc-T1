@@ -1,5 +1,9 @@
 package com.bcopstein.ex4_lancheriaddd_v1.Adaptadores.Apresentacao;
 
+import java.time.LocalDate;
+import java.util.List;
+
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,16 +23,19 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.CancelarPedidoUC;
+import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.ListarPedidosClienteEntreguesUC;
+import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.ListarPedidosEntreguesUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.PagarPedidoUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.SolicitaStatusPedidoUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.SubmeterPedidoUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Requests.PagarPedidoRequest;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Requests.SubmeterPedidoRequest;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.PagarPedidoResponse;
+import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.PedidoListagemResponse;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.PedidoResponse;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.StatusPedidoResponse;
 
-@Tag(name = "Pedidos", description = "UC4, UC5, UC6, UC7 - Submissão, consulta, cancelamento e pagamento de pedidos")
+@Tag(name = "Pedidos", description = "UC4-UC9 - Submissão, consulta, cancelamento, pagamento e listagem de pedidos")
 @RestController
 @RequestMapping("/pedidos")
 public class PedidoController {
@@ -36,15 +43,21 @@ public class PedidoController {
     private SolicitaStatusPedidoUC solicitaStatusPedidoUC;
     private PagarPedidoUC pagarPedidoUC;
     private CancelarPedidoUC cancelarPedidoUC;
+    private ListarPedidosEntreguesUC listarPedidosEntreguesUC;
+    private ListarPedidosClienteEntreguesUC listarPedidosClienteEntreguesUC;
 
     public PedidoController(SubmeterPedidoUC submeterPedidoUC,
                             SolicitaStatusPedidoUC solicitaStatusPedidoUC,
                             PagarPedidoUC pagarPedidoUC,
-                            CancelarPedidoUC cancelarPedidoUC) {
+                            CancelarPedidoUC cancelarPedidoUC,
+                            ListarPedidosEntreguesUC listarPedidosEntreguesUC,
+                            ListarPedidosClienteEntreguesUC listarPedidosClienteEntreguesUC) {
         this.submeterPedidoUC = submeterPedidoUC;
         this.solicitaStatusPedidoUC = solicitaStatusPedidoUC;
         this.pagarPedidoUC = pagarPedidoUC;
         this.cancelarPedidoUC = cancelarPedidoUC;
+        this.listarPedidosEntreguesUC = listarPedidosEntreguesUC;
+        this.listarPedidosClienteEntreguesUC = listarPedidosClienteEntreguesUC;
     }
 
     @Operation(
@@ -134,5 +147,36 @@ public class PedidoController {
             @Parameter(description = "CPF do cliente dono do pedido") @RequestParam String cpf) {
         cancelarPedidoUC.executar(id, cpf);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(
+        summary = "Listar pedidos entregues entre datas (UC8)",
+        description = "Retorna todos os pedidos com status ENTREGUE dentro do intervalo de datas informado. Formato de data: yyyy-MM-dd",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
+        }
+    )
+    @GetMapping("/entregues")
+    @CrossOrigin("*")
+    public List<PedidoListagemResponse> listarEntregues(
+            @Parameter(description = "Data inicial (yyyy-MM-dd)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
+            @Parameter(description = "Data final (yyyy-MM-dd)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim) {
+        return listarPedidosEntreguesUC.run(inicio, fim);
+    }
+
+    @Operation(
+        summary = "Listar pedidos de um cliente entregues entre datas (UC9)",
+        description = "Retorna os pedidos de um cliente específico com status ENTREGUE dentro do intervalo de datas informado. Formato de data: yyyy-MM-dd",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
+        }
+    )
+    @GetMapping("/entregues/{cpf}")
+    @CrossOrigin("*")
+    public List<PedidoListagemResponse> listarEntreguesDoCliente(
+            @Parameter(description = "CPF do cliente") @PathVariable String cpf,
+            @Parameter(description = "Data inicial (yyyy-MM-dd)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
+            @Parameter(description = "Data final (yyyy-MM-dd)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim) {
+        return listarPedidosClienteEntreguesUC.run(cpf, inicio, fim);
     }
 }

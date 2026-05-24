@@ -1,5 +1,6 @@
 package com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -67,6 +68,14 @@ public class PedidoService implements IPedidoService {
         pedidoRepository.atualizarStatus(id, Pedido.Status.PAGO);
         pedido.setStatus(Pedido.Status.PAGO);
         return pedido;
+    }
+
+    public List<Pedido> listarEntreguesEntreDatas(LocalDate inicio, LocalDate fim) {
+        return pedidoRepository.listarEntreguesEntreDatas(inicio, fim);
+    }
+
+    public List<Pedido> listarEntreguesDoClienteEntreDatas(String cpf, LocalDate inicio, LocalDate fim) {
+        return pedidoRepository.listarEntreguesDoClienteEntreDatas(cpf, inicio, fim);
     }
 
     @Override
