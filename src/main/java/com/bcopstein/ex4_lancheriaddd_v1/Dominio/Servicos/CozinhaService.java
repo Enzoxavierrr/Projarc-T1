@@ -35,15 +35,20 @@ public class CozinhaService implements ICozinhaService {
         pedidoRepository.atualizarStatus(pedido.getId(), Pedido.Status.PREPARACAO);
         emPreparacao = pedido;
         System.out.println("Pedido em preparacao: " + pedido.getId());
-        scheduler.schedule(() -> pedidoPronto(), 5, TimeUnit.SECONDS);
+        scheduler.schedule(() -> pedidoPronto(), 4, TimeUnit.SECONDS);
     }
 
     @Override
     public synchronized void chegadaDePedido(Pedido p) {
+        System.out.println("Pedido recebido (PAGO): " + p.getId());
+        scheduler.schedule(() -> entrarNaFila(p), 4, TimeUnit.SECONDS);
+    }
+
+    private synchronized void entrarNaFila(Pedido p) {
         p.setStatus(Pedido.Status.AGUARDANDO);
         pedidoRepository.atualizarStatus(p.getId(), Pedido.Status.AGUARDANDO);
         filaEntrada.add(p);
-        System.out.println("Pedido na fila de entrada: " + p.getId());
+        System.out.println("Pedido na fila de entrada (AGUARDANDO): " + p.getId());
         if (emPreparacao == null) {
             colocaEmPreparacao(filaEntrada.poll());
         }
