@@ -5,10 +5,10 @@ import java.util.List;
 
 public class Pedido {
     public enum Status {
-        NOVO,
+        NOVO,  // 
         APROVADO,
         REPROVADO,
-        PAGO,
+        PAGO, // 
         AGUARDANDO,
         PREPARACAO,
         PRONTO,

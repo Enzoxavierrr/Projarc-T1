@@ -1,0 +1,26 @@
+meta {
+  name: Registrar Cliente
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/clientes/registrar
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "cpf": "12345678900",
+    "nome": "João Silva",
+    "email": "joao@email.com",
+    "senha": "senha123",
+    "celular": "51999999999",
+    "endereco": "Rua das Flores, 100"
+  }
+}
