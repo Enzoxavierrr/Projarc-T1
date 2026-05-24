@@ -77,6 +77,7 @@ create table if not exists pedidos (
     cliente_cpf varchar(15) not null,
     data_criacao timestamp,
     data_hora_pagamento timestamp,
+    data_entrega timestamp,
     status varchar(20) not null,
     valor double not null,
     impostos double not null,
