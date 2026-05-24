@@ -1,11 +1,12 @@
 package com.bcopstein.ex4_lancheriaddd_v1.Aplicacao;
 
 import org.springframework.stereotype.Component;
-import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos.PedidoService;
+
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.StatusPedidoResponse;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Pedido;
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos.PedidoService;
 
-@Component  
+@Component
 public class SolicitaStatusPedidoUC {
     private PedidoService pedidoService;
 
@@ -13,8 +14,8 @@ public class SolicitaStatusPedidoUC {
         this.pedidoService = pedidoService;
     }
 
-    public StatusPedidoResponse run(long id) {
-        Pedido.Status status = pedidoService.buscaStatusPorId(id);
+    public StatusPedidoResponse run(long id, String cpf) {
+        Pedido.Status status = pedidoService.buscaStatusPorIdDoCliente(id, cpf);
         return new StatusPedidoResponse(id, status);
-    } //delega para o serviço de dominio buscar o status e monta a resposta. Cada camada faz só o que é responsavilidade dela.
+    }
 }

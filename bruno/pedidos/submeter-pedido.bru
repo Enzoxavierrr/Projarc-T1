@@ -10,12 +10,12 @@ post {
   auth: bearer
 }
 
-auth:bearer {
-  token: {{token}}
-}
-
 headers {
   Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
 }
 
 body:json {
@@ -28,4 +28,8 @@ body:json {
     ],
     "enderecoEntrega": "Rua das Flores, 100"
   }
+}
+
+vars:pre-request {
+  base_url: http://localhost:8080
 }

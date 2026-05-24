@@ -2,6 +2,7 @@ package com.bcopstein.ex4_lancheriaddd_v1.Adaptadores.Apresentacao;
 
 import java.io.IOException;
 
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -22,24 +23,38 @@ public class AutenticacaoFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
         String path = request.getRequestURI();
+        String contextPath = request.getContextPath();
         String method = request.getMethod();
 
-        // Endpoints públicos: registro, login, welcome, swagger/openapi
-        if (path.equals("/") || path.equals("")) return true;
-        if (path.equals("/clientes/registrar")) return true;
-        if (path.equals("/clientes/login")) return true;
+        if (contextPath != null && !contextPath.isBlank() && path.startsWith(contextPath)) {
+            path = path.substring(contextPath.length());
+        }
+        if (path.endsWith("/") && path.length() > 1) {
+            path = path.substring(0, path.length() - 1);
+        }
+
+        if ("OPTIONS".equalsIgnoreCase(method)) return true;
         if (path.startsWith("/swagger-ui")) return true;
         if (path.startsWith("/v3/api-docs")) return true;
         if (path.startsWith("/h2-console")) return true;
-        if ("OPTIONS".equalsIgnoreCase(method)) return true;
+        if (path.equals("/") || path.isBlank()) return true;
+        if (path.equals("/clientes/registrar")) return true;
+        if (path.equals("/clientes/login")) return true;
 
-        return false;
+        // UCs com autenticacao obrigatoria (A): UC3, UC4, UC5, UC6, UC7
+        boolean uc3 = path.startsWith("/cardapio");
+        boolean uc4 = "POST".equalsIgnoreCase(method) && path.equals("/pedidos/submeter");
+        boolean uc5 = "GET".equalsIgnoreCase(method) && path.startsWith("/pedidos/status/");
+        boolean uc6 = "DELETE".equalsIgnoreCase(method) && path.matches("^/pedidos/\\d+$");
+        boolean uc7 = "POST".equalsIgnoreCase(method) && path.matches("^/pedidos/\\d+/pagar$");
+        boolean endpointProtegido = uc3 || uc4 || uc5 || uc6 || uc7;
+        return !endpointProtegido;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
@@ -47,7 +62,7 @@ public class AutenticacaoFilter extends OncePerRequestFilter {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
-            response.getWriter().write("{\"error\":\"Token de autenticação ausente ou inválido.\"}");
+            response.getWriter().write("{\"error\":\"Token de autenticacao ausente ou invalido.\"}");
             return;
         }
 
@@ -57,7 +72,7 @@ public class AutenticacaoFilter extends OncePerRequestFilter {
         if (cpf == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
-            response.getWriter().write("{\"error\":\"Token de autenticação ausente ou inválido.\"}");
+            response.getWriter().write("{\"error\":\"Token de autenticacao ausente ou invalido.\"}");
             return;
         }
 

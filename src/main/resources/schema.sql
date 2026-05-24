@@ -38,7 +38,8 @@ create table if not exists receita_ingrediente (
 create table if not exists produtos (
   id bigint primary key,
   descricao varchar(255) not null,
-  preco bigint
+  preco bigint,
+  disponivel boolean not null default true
 );
 
 -- Tabela de relacionamento entre Produto e Receita

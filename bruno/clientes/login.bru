@@ -21,6 +21,11 @@ body:json {
   }
 }
 
+vars:pre-request {
+  base_url: http://localhost:8080
+}
+
 script:post-response {
   bru.setVar("token", res.body.token);
 }
+

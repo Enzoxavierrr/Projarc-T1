@@ -104,8 +104,10 @@ public class PedidoController {
     )
     @GetMapping("/status/{idPedido}")
     @CrossOrigin("*")
-    public StatusPedidoResponse solicitaStatusUC(@Parameter(description = "ID do pedido") @PathVariable long idPedido) {
-        return solicitaStatusPedidoUC.run(idPedido);
+    public StatusPedidoResponse solicitaStatusUC(@Parameter(description = "ID do pedido") @PathVariable long idPedido,
+                                                 HttpServletRequest httpRequest) {
+        String cpfAutenticado = (String) httpRequest.getAttribute("cpfAutenticado");
+        return solicitaStatusPedidoUC.run(idPedido, cpfAutenticado);
     }
 
     @Operation(

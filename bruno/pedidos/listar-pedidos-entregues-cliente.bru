@@ -10,11 +10,15 @@ get {
   auth: bearer
 }
 
+params:query {
+  inicio: 2025-01-01
+  fim: 2026-12-31
+}
+
 auth:bearer {
   token: {{token}}
 }
 
-params:query {
-  inicio: 2025-01-01
-  fim: 2026-12-31
+vars:pre-request {
+  base_url: http://localhost:8080
 }

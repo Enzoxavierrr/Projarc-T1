@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.ClienteJaCadastradoException;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.CpfInvalidoException;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.CredenciaisInvalidasException;
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.PagamentoNaoEfetuadoException;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.PedidoNaoEncontradoException;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.PedidoNaoPertenceAoClienteException;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.StatusInvalidoParaCancelamentoException;
@@ -26,22 +27,27 @@ public class GlobalExceptionHandler {
                 "status", HttpStatus.NOT_FOUND.value(),
                 "error", "Not Found",
                 "message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body); 
-    } // aqui as exececoes de dominio sao capturadas centralizadamente aqui no GlobalExceptionHandler. 
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
 
     @ExceptionHandler(PedidoNaoPertenceAoClienteException.class)
     public ResponseEntity<String> handlePedidoNaoPertenceAoCliente(PedidoNaoPertenceAoClienteException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Pedido não pertence ao cliente autenticado.");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Pedido nao pertence ao cliente autenticado.");
     }
 
     @ExceptionHandler(StatusInvalidoParaCancelamentoException.class)
     public ResponseEntity<String> handleStatusInvalido(StatusInvalidoParaCancelamentoException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Este pedido não pode ser cancelado no status atual.");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Este pedido nao pode ser cancelado no status atual.");
     }
 
     @ExceptionHandler(StatusInvalidoParaPagamentoException.class)
     public ResponseEntity<String> handleStatusInvalidoPagamento(StatusInvalidoParaPagamentoException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Este pedido não pode ser pago no status atual.");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Este pedido nao pode ser pago no status atual.");
+    }
+
+    @ExceptionHandler(PagamentoNaoEfetuadoException.class)
+    public ResponseEntity<String> handlePagamentoNaoEfetuado(PagamentoNaoEfetuadoException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
     @ExceptionHandler(ClienteJaCadastradoException.class)

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Dados.PedidoRepository;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.ItemPedido;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Pedido;
+import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.PagamentoNaoEfetuadoException;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.PedidoNaoEncontradoException;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.PedidoNaoPertenceAoClienteException;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.StatusInvalidoParaCancelamentoException;
@@ -19,13 +20,15 @@ public class PedidoService implements IPedidoService {
     private IDescontoService descontoService;
     private IImpostoService impostoService;
     private IEstoqueService estoqueService;
+    private IPagamentoService pagamentoService;
 
     public PedidoService(PedidoRepository pedidoRepository, IDescontoService descontoService,
-            IImpostoService impostoService, IEstoqueService estoqueService) {
+            IImpostoService impostoService, IEstoqueService estoqueService, IPagamentoService pagamentoService) {
         this.pedidoRepository = pedidoRepository;
         this.descontoService = descontoService;
         this.impostoService = impostoService;
         this.estoqueService = estoqueService;
+        this.pagamentoService = pagamentoService;
     }
 
     @Override
@@ -48,9 +51,18 @@ public class PedidoService implements IPedidoService {
     public Pedido.Status buscaStatusPorId(long id) {
         return pedidoRepository.buscaStatusPorId(id)
                 .orElseThrow(() -> new PedidoNaoEncontradoException(id));
-    } 
-    // o servico de dominio pergunta ao repo, se o pedido existir, lanca uma execao de dominio - pedidonaoEncontrado - que é tratado na camada de apresnetacao.
-    
+    }
+
+    public Pedido.Status buscaStatusPorIdDoCliente(long id, String cpf) {
+        Pedido pedido = pedidoRepository.buscarResumoPorId(id)
+                .orElseThrow(() -> new PedidoNaoEncontradoException(id));
+
+        if (!pedido.getCliente().getCpf().equals(cpf)) {
+            throw new PedidoNaoPertenceAoClienteException(id, cpf);
+        }
+
+        return pedido.getStatus();
+    }
 
     @Override
     public Pedido pagar(long id, String cpf) {
@@ -63,6 +75,11 @@ public class PedidoService implements IPedidoService {
 
         if (pedido.getStatus() != Pedido.Status.APROVADO) {
             throw new StatusInvalidoParaPagamentoException(pedido.getStatus());
+        }
+
+        boolean pagamentoEfetuado = pagamentoService.pagar(pedido);
+        if (!pagamentoEfetuado) {
+            throw new PagamentoNaoEfetuadoException();
         }
 
         pedidoRepository.atualizarStatus(id, Pedido.Status.PAGO);
@@ -81,7 +98,7 @@ public class PedidoService implements IPedidoService {
     @Override
     public void cancelar(long id, String cpf) {
         Pedido pedido = pedidoRepository.buscarResumoPorId(id)
-            .orElseThrow(() -> new PedidoNaoEncontradoException(id));
+                .orElseThrow(() -> new PedidoNaoEncontradoException(id));
 
         if (!pedido.getCliente().getCpf().equals(cpf)) {
             throw new PedidoNaoPertenceAoClienteException(id, cpf);
