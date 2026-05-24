@@ -20,9 +20,28 @@ import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.PedidoNaoEncontradoExc
 public class PedidoRepositoryJDBC implements PedidoRepository {
     private JdbcTemplate jdbcTemplate;
 
+    private static final org.springframework.jdbc.core.RowMapper<Pedido> PEDIDO_ROW_MAPPER =
+        (rs, rowNum) -> new Pedido(
+            rs.getLong("id"),
+            new Cliente(
+                rs.getString("cpf"),
+                rs.getString("nome"),
+                rs.getString("celular"),
+                rs.getString("endereco"),
+                rs.getString("email")
+            ),
+            rs.getObject("data_hora_pagamento", LocalDateTime.class),
+            List.of(),
+            Pedido.Status.valueOf(rs.getString("status")),
+            rs.getDouble("valor"),
+            rs.getDouble("impostos"),
+            rs.getDouble("desconto"),
+            rs.getDouble("valor_cobrado"),
+            rs.getString("endereco_entrega")
+        );
+
     public PedidoRepositoryJDBC(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        
     }
 
     @Override
@@ -78,7 +97,16 @@ public class PedidoRepositoryJDBC implements PedidoRepository {
 
     @Override
     public void atualizarStatus(long id, Pedido.Status status) {
-        int linhasAfetadas = jdbcTemplate.update("UPDATE pedidos SET status = ? WHERE id = ?", status.name(), id);
+        int linhasAfetadas;
+        if (status == Pedido.Status.ENTREGUE) {
+            linhasAfetadas = jdbcTemplate.update(
+                "UPDATE pedidos SET status = ?, data_entrega = ? WHERE id = ?",
+                status.name(), LocalDateTime.now(), id);
+        } else {
+            linhasAfetadas = jdbcTemplate.update(
+                "UPDATE pedidos SET status = ? WHERE id = ?",
+                status.name(), id);
+        }
         if (linhasAfetadas == 0) {
             throw new PedidoNaoEncontradoException(id);
         }
@@ -91,63 +119,44 @@ public class PedidoRepositoryJDBC implements PedidoRepository {
                      "c.cpf, c.nome, c.celular, c.endereco, c.email " +
                      "FROM pedidos p JOIN clientes c ON p.cliente_cpf = c.cpf " +
                      "WHERE p.id = ?";
-        List<Pedido> resultado = jdbcTemplate.query(
-            sql,
-            ps -> ps.setLong(1, id),
-            (rs, rowNum) -> new Pedido(
-                rs.getLong("id"),
-                new Cliente(
-                    rs.getString("cpf"),
-                    rs.getString("nome"),
-                    rs.getString("celular"),
-                    rs.getString("endereco"),
-                    rs.getString("email")
-                ),
-                rs.getObject("data_hora_pagamento", LocalDateTime.class),
-                List.of(),
-                Pedido.Status.valueOf(rs.getString("status")),
-                rs.getDouble("valor"),
-                rs.getDouble("impostos"),
-                rs.getDouble("desconto"),
-                rs.getDouble("valor_cobrado"),
-                rs.getString("endereco_entrega")
-            )
-        );
+        List<Pedido> resultado = jdbcTemplate.query(sql, ps -> ps.setLong(1, id), PEDIDO_ROW_MAPPER);
         return resultado.isEmpty() ? Optional.empty() : Optional.of(resultado.getFirst());
     }
 
     @Override
     public List<Pedido> listarEntreguesEntreDatas(LocalDate inicio, LocalDate fim) {
         String sql = "SELECT p.id, p.status, p.valor, p.impostos, p.desconto, p.valor_cobrado, " +
-                     "p.data_hora_pagamento, p.data_entrega, p.endereco_entrega, " +
+                     "p.data_hora_pagamento, p.endereco_entrega, " +
                      "c.cpf, c.nome, c.celular, c.endereco, c.email " +
                      "FROM pedidos p JOIN clientes c ON p.cliente_cpf = c.cpf " +
                      "WHERE p.status = 'ENTREGUE' " +
-                     "AND p.data_entrega >= ? AND p.data_entrega <= ?";
+                     "AND p.data_entrega >= ? AND p.data_entrega < ?";
         return jdbcTemplate.query(
             sql,
             ps -> {
                 ps.setObject(1, inicio.atStartOfDay());
-                ps.setObject(2, fim.atTime(23, 59, 59));
+                ps.setObject(2, fim.plusDays(1).atStartOfDay());
             },
-            (rs, rowNum) -> new Pedido(
-                rs.getLong("id"),
-                new Cliente(
-                    rs.getString("cpf"),
-                    rs.getString("nome"),
-                    rs.getString("celular"),
-                    rs.getString("endereco"),
-                    rs.getString("email")
-                ),
-                rs.getObject("data_hora_pagamento", LocalDateTime.class),
-                List.of(),
-                Pedido.Status.valueOf(rs.getString("status")),
-                rs.getDouble("valor"),
-                rs.getDouble("impostos"),
-                rs.getDouble("desconto"),
-                rs.getDouble("valor_cobrado"),
-                rs.getString("endereco_entrega")
-            )
+            PEDIDO_ROW_MAPPER
+        );
+    }
+
+    @Override
+    public List<Pedido> listarEntreguesDoClienteEntreDatas(String cpf, LocalDate inicio, LocalDate fim) {
+        String sql = "SELECT p.id, p.status, p.valor, p.impostos, p.desconto, p.valor_cobrado, " +
+                     "p.data_hora_pagamento, p.endereco_entrega, " +
+                     "c.cpf, c.nome, c.celular, c.endereco, c.email " +
+                     "FROM pedidos p JOIN clientes c ON p.cliente_cpf = c.cpf " +
+                     "WHERE p.status = 'ENTREGUE' AND c.cpf = ? " +
+                     "AND p.data_entrega >= ? AND p.data_entrega < ?";
+        return jdbcTemplate.query(
+            sql,
+            ps -> {
+                ps.setString(1, cpf);
+                ps.setObject(2, inicio.atStartOfDay());
+                ps.setObject(3, fim.plusDays(1).atStartOfDay());
+            },
+            PEDIDO_ROW_MAPPER
         );
     }
 
