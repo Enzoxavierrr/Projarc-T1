@@ -34,9 +34,90 @@ O Swagger UI lista todos os endpoints agrupados por UC, com descrições, exempl
 
 ---
 
+## Autenticação
+
+A maioria dos endpoints é protegida por token Bearer. O fluxo é:
+
+1. Registre um cliente (`POST /clientes/registrar`) ou use um dos clientes já cadastrados
+2. Faça login (`POST /clientes/login`) e copie o `token` retornado
+3. Em todas as requisições protegidas, envie o header:
+
+```
+Authorization: Bearer <token>
+```
+
+> **Rotas públicas** (sem token): `/clientes/registrar`, `/clientes/login`, `/swagger-ui/**`, `/v3/api-docs/**`  
+> **Rotas protegidas** (exigem token): todos os demais endpoints
+
+---
+
 ## Endpoints
 
-### Cardápio (UC3)
+### Clientes
+
+#### UC1 — Registrar Cliente
+
+```
+POST /clientes/registrar
+```
+
+**Body:**
+```json
+{
+  "cpf": "12345678901",
+  "nome": "João Silva",
+  "email": "joao@email.com",
+  "senha": "senha123",
+  "celular": "51999999999",
+  "endereco": "Rua das Flores, 100"
+}
+```
+
+Regras:
+- CPF deve ter exatamente **11 dígitos numéricos**
+- CPF e e-mail não podem estar já cadastrados
+
+**Respostas:**
+- `201` — `{ "mensagem": "Usuario @João Silva cadastrado com sucesso." }`
+- `400` — CPF inválido
+- `409` — CPF ou e-mail já cadastrado
+
+---
+
+#### UC2 — Autenticar (Login)
+
+```
+POST /clientes/login
+```
+
+**Body:**
+```json
+{
+  "email": "joao@email.com",
+  "senha": "senha123"
+}
+```
+
+**Respostas:**
+- `200` — Retorna token e mensagem de boas-vindas:
+```json
+{
+  "cpf": "12345678901",
+  "token": "uuid-gerado",
+  "mensagem": "Usuario @João Silva logado com sucesso."
+}
+```
+- `401` — Email ou senha inválidos
+
+> Guarde o `token` retornado — ele será necessário para todas as requisições protegidas.
+
+---
+
+### Cardápio
+
+#### UC3 — Carregar Cardápio
+
+> Requer `Authorization: Bearer <token>`
 
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
@@ -50,6 +131,8 @@ O Swagger UI lista todos os endpoints agrupados por UC, com descrições, exempl
 
 #### UC4 — Submeter Pedido
 
+> Requer `Authorization: Bearer <token>`
+
 ```
 POST /pedidos/submeter
 ```
@@ -57,7 +140,6 @@ POST /pedidos/submeter
 **Body:**
 ```json
 {
-  "clienteCpf": "9001",
   "enderecoEntrega": "Rua das Flores, 100",
   "itens": [
     { "produtoId": 3, "quantidade": 1 },
@@ -66,13 +148,15 @@ POST /pedidos/submeter
 }
 ```
 
-> **Atenção:** o produto de ID `1` sempre é reprovado pelo `EstoqueServiceFake` (comportamento intencional de teste). Use outros IDs para obter pedido APROVADO.
+> O cliente é identificado automaticamente pelo token — não é necessário informar CPF no body.
 
 O sistema verifica estoque, aplica desconto e imposto e retorna o pedido com status `APROVADO` ou `REPROVADO`. Em ambos os casos o pedido é salvo no banco e recebe um ID.
 
 ---
 
 #### UC5 — Consultar Status do Pedido
+
+> Requer `Authorization: Bearer <token>`
 
 ```
 GET /pedidos/status/{idPedido}
@@ -96,61 +180,100 @@ Retorna o status atual do pedido. Possíveis valores:
 
 #### UC6 — Cancelar Pedido
 
+> Requer `Authorization: Bearer <token>`
+
 ```
-DELETE /pedidos/{id}?cpf=9001
+DELETE /pedidos/{id}
 ```
 
-Cancela um pedido com status `APROVADO`. O CPF informado deve ser do cliente dono do pedido.
+Cancela um pedido com status `APROVADO`. O token identifica o cliente — somente o dono do pedido pode cancelar.
 
 **Respostas:**
 - `204` — Cancelado com sucesso
 - `400` — Pedido não está em status cancelável
-- `403` — CPF não pertence ao dono do pedido
+- `403` — Pedido não pertence ao cliente autenticado
 - `404` — Pedido não encontrado
 
 ---
 
 #### UC7 — Pagar Pedido
 
+> Requer `Authorization: Bearer <token>`
+
 ```
 POST /pedidos/{id}/pagar
 ```
 
-**Body:**
-```json
-{
-  "cpf": "9001"
-}
-```
-
-Processa o pagamento de um pedido com status `APROVADO`. Após o pagamento, o pedido é encaminhado automaticamente para a fila da cozinha.
+Processa o pagamento de um pedido com status `APROVADO`. O cliente é identificado pelo token. Após o pagamento, o pedido avança automaticamente para a fila da cozinha.
 
 **Respostas:**
-- `200` — Pagamento realizado
-- `400` — Pedido não está com status `APROVADO`
-- `403` — CPF não pertence ao dono do pedido
+- `200` — Pagamento realizado com sucesso
+- `400` — Pedido não está com status `APROVADO` ou pagamento recusado
+- `403` — Pedido não pertence ao cliente autenticado
 - `404` — Pedido não encontrado
 
 ---
 
-## Clientes e Produtos disponíveis no banco (dados iniciais)
+#### UC8 — Listar Pedidos Entregues por Período
 
-### Clientes
+```
+GET /pedidos/entregues?inicio=2025-01-01&fim=2025-12-31
+```
 
-| CPF | Nome |
-|-----|------|
-| `9001` | Huguinho Pato |
-| `9002` | Luizinho Pato |
+Lista todos os pedidos com status `ENTREGUE` dentro do intervalo de datas informado.
 
-### Produtos (cardápio ativo: ID 2)
+**Parâmetros:**
+
+| Parâmetro | Formato | Descrição |
+|-----------|---------|-----------|
+| `inicio` | `YYYY-MM-DD` | Data inicial (inclusive) |
+| `fim` | `YYYY-MM-DD` | Data final (inclusive) |
+
+---
+
+#### UC9 — Listar Meus Pedidos Entregues
+
+> Requer `Authorization: Bearer <token>`
+
+```
+GET /pedidos/entregues/meus?inicio=2025-01-01&fim=2025-12-31
+```
+
+Lista os pedidos com status `ENTREGUE` do cliente autenticado dentro do intervalo de datas. O CPF é extraído automaticamente do token.
+
+---
+
+## Clientes disponíveis no banco (dados iniciais)
+
+| CPF | Nome | Email | Senha |
+|-----|------|-------|-------|
+| `9001` | Huguinho Pato | `huguinho.pato@email.com` | `123456` |
+| `9002` | Luizinho Pato | `zezinho.pato@email.com` | `123456` |
+
+---
+
+## Produtos (cardápio ativo: ID 2)
 
 | ID | Produto | Preço |
 |----|---------|-------|
-| 1 | Pizza calabresa | R$ 55,00 (**reprovado no estoque fake**) |
+| 1 | Pizza calabresa | R$ 55,00 |
 | 3 | Pizza margherita | R$ 40,00 |
 | 4 | Pizza portuguesa | R$ 65,00 |
 | 5 | Pizza frango com catupiry | R$ 70,00 |
 | 6 | Pizza quatro queijos | R$ 75,00 |
+
+---
+
+## Fluxo completo de um pedido
+
+```
+1. POST /clientes/login              → autenticar e obter token
+2. GET  /cardapio/corrente           → ver produtos disponíveis
+3. POST /pedidos/submeter            → criar pedido (retorna id + status)
+4. GET  /pedidos/status/{id}         → consultar status
+5. POST /pedidos/{id}/pagar          → pagar (só se APROVADO)
+6. GET  /pedidos/status/{id}         → confirmar novo status (PAGO → AGUARDANDO → ... → ENTREGUE)
+```
 
 ---
 
@@ -159,24 +282,29 @@ Processa o pagamento de um pedido com status `APROVADO`. Após o pagamento, o pe
 O projeto segue **Clean Architecture** em 4 camadas:
 
 ```
-┌────────────────────────────────────────┐
-│    ADAPTADORES (Interface Externa)     │
-│  Controllers | Presenters | Repositórios│
-├────────────────────────────────────────┤
-│    APLICAÇÃO (Casos de Uso)            │
-│  CarregarCardapioUC                    │
-│  SubmeterPedidoUC                      │
-│  SolicitaStatusPedidoUC               │
-│  CancelarPedidoUC                      │
-│  PagarPedidoUC                         │
-├────────────────────────────────────────┤
-│    DOMÍNIO (Lógica de Negócio)         │
-│  Entidades | Serviços | Interfaces     │
-│  Pedido | Cliente | Produto | Cardápio │
-├────────────────────────────────────────┤
-│    INFRAESTRUTURA                      │
-│  Spring Boot | JDBC | H2 Database      │
-└────────────────────────────────────────┘
+┌────────────────────────────────────────────┐
+│      ADAPTADORES (Interface Externa)       │
+│  Controllers | Presenters | Repositórios   │
+│  AutenticacaoFilter                        │
+├────────────────────────────────────────────┤
+│      APLICAÇÃO (Casos de Uso)              │
+│  RegistrarClienteUC  (UC1)                 │
+│  AutenticarUC        (UC2)                 │
+│  CarregarCardapioUC  (UC3)                 │
+│  SubmeterPedidoUC    (UC4)                 │
+│  SolicitaStatusPedidoUC (UC5)              │
+│  CancelarPedidoUC    (UC6)                 │
+│  PagarPedidoUC       (UC7)                 │
+│  ListarPedidosEntreguesUC       (UC8)      │
+│  ListarPedidosClienteEntreguesUC (UC9)     │
+├────────────────────────────────────────────┤
+│      DOMÍNIO (Lógica de Negócio)           │
+│  Entidades | Serviços | Interfaces         │
+│  Pedido | Cliente | Produto | Cardápio     │
+├────────────────────────────────────────────┤
+│      INFRAESTRUTURA                        │
+│  Spring Boot | JDBC | H2 Database          │
+└────────────────────────────────────────────┘
 ```
 
 ---
@@ -192,18 +320,6 @@ O projeto segue **Clean Architecture** em 4 camadas:
 | SpringDoc OpenAPI | 2.8.9 | Swagger UI / documentação interativa |
 | Lombok | — | Reduz boilerplate |
 | Maven | 3.9+ | Build e dependências |
-
----
-
-## Fluxo completo de um pedido
-
-```
-1. GET  /cardapio/corrente          → ver produtos disponíveis
-2. POST /pedidos/submeter           → criar pedido (retorna id + status)
-3. GET  /pedidos/status/{id}        → consultar status
-4. POST /pedidos/{id}/pagar         → pagar (só se APROVADO)
-5. GET  /pedidos/status/{id}        → confirmar novo status (AGUARDANDO → PREPARACAO → PRONTO)
-```
 
 ---
 
