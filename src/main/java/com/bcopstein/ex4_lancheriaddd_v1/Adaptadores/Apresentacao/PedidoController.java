@@ -17,13 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
-
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.CancelarPedidoUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.ListarPedidosClienteEntreguesUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.ListarPedidosEntreguesUC;
@@ -37,7 +30,6 @@ import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.PedidoListagemRespo
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.PedidoResponse;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.StatusPedidoResponse;
 
-@Tag(name = "Pedidos", description = "UC4-UC9 - Submissão, consulta, cancelamento, pagamento e listagem de pedidos")
 @RestController
 @RequestMapping("/pedidos")
 public class PedidoController {
@@ -62,29 +54,6 @@ public class PedidoController {
         this.listarPedidosClienteEntreguesUC = listarPedidosClienteEntreguesUC;
     }
 
-    @Operation(
-        summary = "Submeter pedido (UC4)",
-        description = "Cria um novo pedido. O sistema verifica estoque, aplica desconto e imposto. Retorna status APROVADO ou REPROVADO.",
-        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            content = @Content(
-                mediaType = "application/json",
-                examples = @ExampleObject(value = """
-                    {
-                      "clienteCpf": "9001",
-                      "enderecoEntrega": "Rua das Flores, 100",
-                      "itens": [
-                        { "produtoId": 3, "quantidade": 1 },
-                        { "produtoId": 5, "quantidade": 2 }
-                      ]
-                    }
-                    """)
-            )
-        ),
-        responses = {
-            @ApiResponse(responseCode = "200", description = "Pedido criado (aprovado ou reprovado)"),
-            @ApiResponse(responseCode = "404", description = "Cliente ou produto não encontrado")
-        }
-    )
     @PostMapping("/submeter")
     @CrossOrigin("*")
     public PedidoResponse submeterPedido(@RequestBody SubmeterPedidoRequest request,
@@ -94,99 +63,46 @@ public class PedidoController {
         return submeterPedidoUC.run(request);
     }
 
-    @Operation(
-        summary = "Consultar status do pedido (UC5)",
-        description = "Retorna o status atual de um pedido pelo seu ID. Possíveis status: NOVO, APROVADO, REPROVADO, PAGO, AGUARDANDO, PREPARACAO, PRONTO, TRANSPORTE, ENTREGUE, CANCELADO.",
-        responses = {
-            @ApiResponse(responseCode = "200", description = "Status retornado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Pedido não encontrado")
-        }
-    )
     @GetMapping("/status/{idPedido}")
     @CrossOrigin("*")
-    public StatusPedidoResponse solicitaStatusUC(@Parameter(description = "ID do pedido") @PathVariable long idPedido,
+    public StatusPedidoResponse solicitaStatusUC(@PathVariable long idPedido,
                                                  HttpServletRequest httpRequest) {
         String cpfAutenticado = (String) httpRequest.getAttribute("cpfAutenticado");
         return solicitaStatusPedidoUC.run(idPedido, cpfAutenticado);
     }
 
-    @Operation(
-        summary = "Pagar pedido (UC7)",
-        description = "Processa o pagamento de um pedido com status APROVADO. Após o pagamento, o pedido é encaminhado para a cozinha.",
-        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            content = @Content(
-                mediaType = "application/json",
-                examples = @ExampleObject(value = """
-                    {
-                      "cpf": "9001"
-                    }
-                    """)
-            )
-        ),
-        responses = {
-            @ApiResponse(responseCode = "200", description = "Pagamento realizado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Pedido não está com status APROVADO"),
-            @ApiResponse(responseCode = "403", description = "CPF não pertence ao dono do pedido"),
-            @ApiResponse(responseCode = "404", description = "Pedido não encontrado")
-        }
-    )
     @PostMapping("/{id}/pagar")
     @CrossOrigin("*")
-    public PagarPedidoResponse pagar(@Parameter(description = "ID do pedido") @PathVariable long id,
+    public PagarPedidoResponse pagar(@PathVariable long id,
                                      HttpServletRequest httpRequest) {
         String cpfAutenticado = (String) httpRequest.getAttribute("cpfAutenticado");
         PagarPedidoRequest request = new PagarPedidoRequest(cpfAutenticado);
         return pagarPedidoUC.executar(id, request);
     }
 
-    @Operation(
-        summary = "Cancelar pedido (UC6)",
-        description = "Cancela um pedido com status APROVADO. O CPF deve pertencer ao cliente dono do pedido.",
-        responses = {
-            @ApiResponse(responseCode = "204", description = "Pedido cancelado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Pedido não pode ser cancelado no status atual"),
-            @ApiResponse(responseCode = "403", description = "CPF não pertence ao dono do pedido"),
-            @ApiResponse(responseCode = "404", description = "Pedido não encontrado")
-        }
-    )
     @DeleteMapping("/{id}")
     @CrossOrigin("*")
-    public ResponseEntity<Void> cancelarPedido(
-            @Parameter(description = "ID do pedido") @PathVariable long id,
-            HttpServletRequest httpRequest) {
+    public ResponseEntity<Void> cancelarPedido(@PathVariable long id,
+                                               HttpServletRequest httpRequest) {
         String cpfAutenticado = (String) httpRequest.getAttribute("cpfAutenticado");
         cancelarPedidoUC.executar(id, cpfAutenticado);
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(
-        summary = "Listar pedidos entregues entre datas (UC8)",
-        description = "Retorna todos os pedidos com status ENTREGUE dentro do intervalo de datas informado. Formato de data: yyyy-MM-dd",
-        responses = {
-            @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
-        }
-    )
     @GetMapping("/entregues")
     @CrossOrigin("*")
     public List<PedidoListagemResponse> listarEntregues(
-            @Parameter(description = "Data inicial (yyyy-MM-dd)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
-            @Parameter(description = "Data final (yyyy-MM-dd)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim) {
         return listarPedidosEntreguesUC.run(inicio, fim);
     }
 
-    @Operation(
-        summary = "Listar pedidos de um cliente entregues entre datas (UC9)",
-        description = "Retorna os pedidos de um cliente específico com status ENTREGUE dentro do intervalo de datas informado. Formato de data: yyyy-MM-dd",
-        responses = {
-            @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
-        }
-    )
     @GetMapping("/entregues/meus")
     @CrossOrigin("*")
     public List<PedidoListagemResponse> listarEntreguesDoCliente(
             HttpServletRequest httpRequest,
-            @Parameter(description = "Data inicial (yyyy-MM-dd)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
-            @Parameter(description = "Data final (yyyy-MM-dd)") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim) {
         String cpfAutenticado = (String) httpRequest.getAttribute("cpfAutenticado");
         return listarPedidosClienteEntreguesUC.run(cpfAutenticado, inicio, fim);
     }

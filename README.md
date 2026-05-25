@@ -22,18 +22,6 @@ A aplicação sobe na porta `8080`.
 
 ---
 
-## Documentação Interativa (Swagger)
-
-Com a aplicação rodando, acesse:
-
-```
-http://localhost:8080/swagger-ui/index.html
-```
-
-O Swagger UI lista todos os endpoints agrupados por UC, com descrições, exemplos de JSON prontos e botão **"Try it out"** para testar direto no navegador — sem precisar de Bruno ou Postman.
-
----
-
 ## Autenticação
 
 A maioria dos endpoints é protegida por token Bearer. O fluxo é:
@@ -46,7 +34,7 @@ A maioria dos endpoints é protegida por token Bearer. O fluxo é:
 Authorization: Bearer <token>
 ```
 
-> **Rotas públicas** (sem token): `/clientes/registrar`, `/clientes/login`, `/swagger-ui/**`, `/v3/api-docs/**`  
+> **Rotas públicas** (sem token): `/clientes/registrar`, `/clientes/login`  
 > **Rotas protegidas** (exigem token): todos os demais endpoints
 
 ---
@@ -317,7 +305,6 @@ O projeto segue **Clean Architecture** em 4 camadas:
 | Spring Boot | 3.5.4 | Framework web |
 | Spring JDBC | 3.5.4 | Acesso a dados |
 | H2 Database | — | Banco em memória (reinicia a cada boot) |
-| SpringDoc OpenAPI | 2.8.9 | Swagger UI / documentação interativa |
 | Lombok | — | Reduz boilerplate |
 | Maven | 3.9+ | Build e dependências |
 
@@ -328,4 +315,3 @@ O projeto segue **Clean Architecture** em 4 camadas:
 - [Clean Architecture - Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 - [Domain-Driven Design - Eric Evans](https://www.domainlanguage.com/)
 - [Spring Boot Documentation](https://spring.io/projects/spring-boot)
-- [SpringDoc OpenAPI](https://springdoc.org/)

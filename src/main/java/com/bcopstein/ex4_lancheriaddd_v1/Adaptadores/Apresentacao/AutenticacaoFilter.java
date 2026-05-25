@@ -36,8 +36,6 @@ public class AutenticacaoFilter extends OncePerRequestFilter {
         }
 
         if ("OPTIONS".equalsIgnoreCase(method)) return true;
-        if (path.startsWith("/swagger-ui")) return true;
-        if (path.startsWith("/v3/api-docs")) return true;
         if (path.startsWith("/h2-console")) return true;
         if (path.equals("/") || path.isBlank()) return true;
         if (path.equals("/clientes/registrar")) return true;

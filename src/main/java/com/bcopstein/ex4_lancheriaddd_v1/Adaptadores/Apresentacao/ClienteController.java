@@ -8,12 +8,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
-
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.AutenticarUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.RegistrarClienteUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Requests.AutenticarRequest;
@@ -21,7 +15,6 @@ import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Requests.RegistrarClienteRequ
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.AutenticarResponse;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.RegistrarClienteResponse;
 
-@Tag(name = "Clientes", description = "UC1 e UC2 - Cadastro e autenticação de clientes")
 @RestController
 @RequestMapping("/clientes")
 public class ClienteController {
@@ -33,30 +26,6 @@ public class ClienteController {
         this.autenticarUC = autenticarUC;
     }
 
-    @Operation(
-        summary = "Registrar cliente (UC1)",
-        description = "Cadastra um novo cliente no sistema. CPF e e-mail devem ser únicos.",
-        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            content = @Content(
-                mediaType = "application/json",
-                examples = @ExampleObject(value = """
-                    {
-                      "cpf": "12345678900",
-                      "nome": "João Silva",
-                      "email": "joao@email.com",
-                      "senha": "minhasenha123",
-                      "celular": "51999999999",
-                      "endereco": "Rua das Flores, 100"
-                    }
-                    """)
-            )
-        ),
-        responses = {
-            @ApiResponse(responseCode = "201", description = "Cliente registrado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "CPF inválido (deve ter 11 dígitos)"),
-            @ApiResponse(responseCode = "409", description = "CPF ou e-mail já cadastrado")
-        }
-    )
     @PostMapping("/registrar")
     @ResponseStatus(HttpStatus.CREATED)
     @CrossOrigin("*")
@@ -64,25 +33,6 @@ public class ClienteController {
         return registrarClienteUC.executar(request);
     }
 
-    @Operation(
-        summary = "Autenticar cliente (UC2)",
-        description = "Autentica o cliente com email e senha. Retorna o CPF do cliente em caso de sucesso.",
-        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            content = @Content(
-                mediaType = "application/json",
-                examples = @ExampleObject(value = """
-                    {
-                      "email": "huguinho.pato@email.com",
-                      "senha": "123456"
-                    }
-                    """)
-            )
-        ),
-        responses = {
-            @ApiResponse(responseCode = "200", description = "Autenticado com sucesso, retorna o CPF"),
-            @ApiResponse(responseCode = "401", description = "Email ou senha inválidos")
-        }
-    )
     @PostMapping("/login")
     @CrossOrigin("*")
     public AutenticarResponse login(@RequestBody AutenticarRequest request) {
