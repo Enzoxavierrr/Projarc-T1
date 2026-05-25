@@ -10,7 +10,9 @@ import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.ItemPedido;
 public class EstoqueServiceFake implements IEstoqueService {
     @Override
     public List<ItemPedido> verificarEstoque(List<ItemPedido> itens) {
-        return List.of();
+        return itens.stream()
+                .filter(item -> item.getItem().getId() == 1)
+                .toList();
     }
 
 }
