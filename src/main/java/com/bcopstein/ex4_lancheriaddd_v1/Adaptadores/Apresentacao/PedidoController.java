@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,6 +27,7 @@ import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Requests.SubmeterPedidoReques
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.PagarPedidoResponse;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.PedidoListagemResponse;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.PedidoResponse;
+import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.CancelarPedidoResponse;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.StatusPedidoResponse;
 
 @RestController
@@ -82,11 +82,11 @@ public class PedidoController {
 
     @DeleteMapping("/{id}")
     @CrossOrigin("*")
-    public ResponseEntity<Void> cancelarPedido(@PathVariable long id,
-                                               HttpServletRequest httpRequest) {
+    public CancelarPedidoResponse cancelarPedido(@PathVariable long id,
+                                                 HttpServletRequest httpRequest) {
         String cpfAutenticado = (String) httpRequest.getAttribute("cpfAutenticado");
         cancelarPedidoUC.executar(id, cpfAutenticado);
-        return ResponseEntity.noContent().build();
+        return new CancelarPedidoResponse("Pedido cancelado com sucesso.");
     }
 
     @GetMapping("/entregues")
