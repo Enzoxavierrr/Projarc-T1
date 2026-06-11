@@ -1,41 +1,103 @@
-# Lancheria DDD - Sistema de Gerenciamento de Pizzaria
+# Tele Pizza — Backend
 
-## Descrição do Projeto
+Sistema de gerenciamento de pedidos de uma pizzaria, desenvolvido como trabalho acadêmico da disciplina de Projeto e Arquitetura de Software (PAS) — 5º semestre.
 
-**Lancheria DDD v1** é um sistema backend para gerenciamento de uma pizzaria, desenvolvido com **Clean Architecture** e **Domain-Driven Design (DDD)** como trabalho acadêmico da disciplina de Projeto de Arquitetura (Projarc) — 5º semestre.
+A Parte 1 implementou o sistema como monolito com Clean Architecture. A Parte 2 evolui para uma arquitetura de microsserviços orquestrada com Docker Compose.
 
 ---
 
-## Como Executar
+## Arquitetura
 
-### Pré-requisitos
-- Java 21+
-- Maven 3.9+
-
-### Passos
-
-```bash
-mvn spring-boot:run
+```
+                        ┌─────────────────────────────────────────────────────┐
+                        │              Docker Compose                         │
+                        │                                                     │
+  Cliente ──────────────▶  Spring Cloud Gateway (:8080)                      │
+  Admin  ──────────────▶       │  validação JWT                              │
+                        │      │  roteamento por nome (Eureka)               │
+                        │      │                                             │
+                        │      ├──────────────▶  Serviço de Pizzaria        │
+                        │      │                 (monolito — Clean Arch)     │
+                        │      │                  │                          │
+                        │      │                  ├── REST síncrono ──▶ Serviço de Estoque │
+                        │      │                  │                    (JPA + BD próprio)  │
+                        │      │                  │                                        │
+                        │      │                  └── RabbitMQ ──▶ Serviço de Entregas    │
+                        │      │                                   (3 instâncias)          │
+                        │      │                                                           │
+                        │      └──────────────▶  Eureka Server (:8761)                   │
+                        └─────────────────────────────────────────────────────────────────┘
 ```
 
-A aplicação sobe na porta `8080`.
+### Microsserviços
+
+| Serviço | Porta | Descrição |
+|---|---|---|
+| `gateway` | 8080 | Ponto de entrada. Valida JWT e roteia requisições |
+| `eureka` | 8761 | Name server. Todos os serviços se registram aqui |
+| `pizzaria` | interno | Monolito principal com os casos de uso de negócio |
+| `estoque` | interno | Gerencia ingredientes com JPA e banco próprio |
+| `entregas` | interno | Consome fila RabbitMQ e simula a entrega (3 instâncias) |
+| `rabbitmq` | 5672 / 15672 | Message broker. Painel web em localhost:15672 |
+
+---
+
+## Como executar
+
+### Pré-requisitos
+
+- Docker e Docker Compose instalados
+
+### Subir tudo
+
+```bash
+docker compose up
+```
+
+### Subir com 3 instâncias do serviço de entregas
+
+```bash
+docker compose up --scale entregas=3
+```
+
+### Verificar serviços registrados no Eureka
+
+Acesse `http://localhost:8761` no navegador.
+
+### Painel do RabbitMQ
+
+Acesse `http://localhost:15672` — usuário `guest`, senha `guest`.
+
+---
+
+## Configuração por variável de ambiente
+
+| Variável | Padrão | Descrição |
+|---|---|---|
+| `IMPOSTO_ATIVO` | `lei_1234` | Define a estratégia de imposto ativa |
+| `EUREKA_URL` | `http://eureka:8761/eureka` | URL do Eureka Server |
+| `RABBITMQ_HOST` | `rabbitmq` | Host do RabbitMQ |
+
+Exemplo de uso:
+```bash
+IMPOSTO_ATIVO=lei_5678 docker compose up
+```
 
 ---
 
 ## Autenticação
 
-A maioria dos endpoints é protegida por token Bearer. O fluxo é:
+O JWT é validado pelo Gateway antes de chegar em qualquer serviço. O fluxo é:
 
-1. Registre um cliente (`POST /clientes/registrar`) ou use um dos clientes já cadastrados
-2. Faça login (`POST /clientes/login`) e copie o `token` retornado
-3. Em todas as requisições protegidas, envie o header:
+1. Registre um cliente ou use um dos clientes já cadastrados
+2. Faça login e copie o `token` retornado
+3. Envie o token em todas as requisições protegidas:
 
 ```
 Authorization: Bearer <token>
 ```
 
-> **Rotas públicas** (sem token): `/clientes/registrar`, `/clientes/login`  
-> **Rotas protegidas** (exigem token): todos os demais endpoints
+Rotas públicas (sem token): `POST /clientes/registrar`, `POST /clientes/login`
 
 ---
 
@@ -43,13 +105,10 @@ Authorization: Bearer <token>
 
 ### Clientes
 
-#### UC1 — Registrar Cliente
-
+#### UC1 — Registrar cliente
 ```
 POST /clientes/registrar
 ```
-
-**Body:**
 ```json
 {
   "cpf": "12345678901",
@@ -60,34 +119,20 @@ POST /clientes/registrar
   "endereco": "Rua das Flores, 100"
 }
 ```
-
-Regras:
-- CPF deve ter exatamente **11 dígitos numéricos**
-- CPF e e-mail não podem estar já cadastrados
-
-**Respostas:**
-- `201` — `{ "mensagem": "Usuario @João Silva cadastrado com sucesso." }`
-- `400` — CPF inválido
-- `409` — CPF ou e-mail já cadastrado
+Respostas: `201` sucesso · `400` CPF inválido · `409` CPF ou e-mail já cadastrado
 
 ---
 
-#### UC2 — Autenticar (Login)
-
+#### UC2 — Login
 ```
 POST /clientes/login
 ```
-
-**Body:**
 ```json
 {
   "email": "joao@email.com",
   "senha": "senha123"
 }
 ```
-
-**Respostas:**
-- `200` — Retorna token e mensagem de boas-vindas:
 ```json
 {
   "cpf": "12345678901",
@@ -95,37 +140,26 @@ POST /clientes/login
   "mensagem": "Usuario @João Silva logado com sucesso."
 }
 ```
-- `401` — Email ou senha inválidos
-
-> Guarde o `token` retornado — ele será necessário para todas as requisições protegidas.
 
 ---
 
 ### Cardápio
 
-#### UC3 — Carregar Cardápio
-
-> Requer `Authorization: Bearer <token>`
-
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| `GET` | `/cardapio/corrente` | Retorna o cardápio ativo no momento |
-| `GET` | `/cardapio/{id}` | Retorna um cardápio específico pelo ID |
-| `GET` | `/cardapio/lista` | Lista todos os cardápios cadastrados |
+#### UC3 — Consultar cardápio
+```
+GET /cardapio/corrente       → cardápio ativo
+GET /cardapio/{id}           → cardápio por ID
+GET /cardapio/lista          → todos os cardápios
+```
 
 ---
 
 ### Pedidos
 
-#### UC4 — Submeter Pedido
-
-> Requer `Authorization: Bearer <token>`
-
+#### UC4 — Submeter pedido
 ```
 POST /pedidos/submeter
 ```
-
-**Body:**
 ```json
 {
   "enderecoEntrega": "Rua das Flores, 100",
@@ -135,27 +169,19 @@ POST /pedidos/submeter
   ]
 }
 ```
-
-> O cliente é identificado automaticamente pelo token — não é necessário informar CPF no body.
-
-O sistema verifica estoque, aplica desconto e imposto e retorna o pedido com status `APROVADO` ou `REPROVADO`. Em ambos os casos o pedido é salvo no banco e recebe um ID.
+O cliente é identificado pelo token. O sistema verifica estoque, aplica desconto e imposto, e retorna o pedido com status `APROVADO` ou `REPROVADO`.
 
 ---
 
-#### UC5 — Consultar Status do Pedido
-
-> Requer `Authorization: Bearer <token>`
-
+#### UC5 — Consultar status
 ```
 GET /pedidos/status/{idPedido}
 ```
 
-Retorna o status atual do pedido. Possíveis valores:
-
 | Status | Descrição |
-|--------|-----------|
-| `APROVADO` | Pedido aprovado, aguardando pagamento |
-| `REPROVADO` | Reprovado por falta de estoque |
+|---|---|
+| `APROVADO` | Aguardando pagamento |
+| `REPROVADO` | Falta de estoque |
 | `PAGO` | Pagamento processado |
 | `AGUARDANDO` | Na fila da cozinha |
 | `PREPARACAO` | Em preparo |
@@ -166,84 +192,84 @@ Retorna o status atual do pedido. Possíveis valores:
 
 ---
 
-#### UC6 — Cancelar Pedido
-
-> Requer `Authorization: Bearer <token>`
-
+#### UC6 — Cancelar pedido
 ```
 DELETE /pedidos/{id}
 ```
+Cancela pedidos com status `APROVADO`. Somente o dono do pedido pode cancelar.
 
-Cancela um pedido com status `APROVADO`. O token identifica o cliente — somente o dono do pedido pode cancelar.
-
-**Respostas:**
-- `204` — Cancelado com sucesso
-- `400` — Pedido não está em status cancelável
-- `403` — Pedido não pertence ao cliente autenticado
-- `404` — Pedido não encontrado
+Respostas: `204` cancelado · `400` status inválido · `403` não é o dono · `404` não encontrado
 
 ---
 
-#### UC7 — Pagar Pedido
-
-> Requer `Authorization: Bearer <token>`
-
+#### UC7 — Pagar pedido
 ```
 POST /pedidos/{id}/pagar
 ```
+Após o pagamento o pedido avança automaticamente para a fila da cozinha e depois para entrega via RabbitMQ.
 
-Processa o pagamento de um pedido com status `APROVADO`. O cliente é identificado pelo token. Após o pagamento, o pedido avança automaticamente para a fila da cozinha.
-
-**Respostas:**
-- `200` — Pagamento realizado com sucesso
-- `400` — Pedido não está com status `APROVADO` ou pagamento recusado
-- `403` — Pedido não pertence ao cliente autenticado
-- `404` — Pedido não encontrado
+Respostas: `200` sucesso · `400` status inválido · `403` não é o dono · `404` não encontrado
 
 ---
 
-#### UC8 — Listar Pedidos Entregues por Período
-
+#### UC8 — Listar pedidos entregues por período (admin)
 ```
 GET /pedidos/entregues?inicio=2025-01-01&fim=2025-12-31
 ```
 
-Lista todos os pedidos com status `ENTREGUE` dentro do intervalo de datas informado.
-
-**Parâmetros:**
-
-| Parâmetro | Formato | Descrição |
-|-----------|---------|-----------|
-| `inicio` | `YYYY-MM-DD` | Data inicial (inclusive) |
-| `fim` | `YYYY-MM-DD` | Data final (inclusive) |
-
 ---
 
-#### UC9 — Listar Meus Pedidos Entregues
-
-> Requer `Authorization: Bearer <token>`
-
+#### UC9 — Meus pedidos entregues
 ```
 GET /pedidos/entregues/meus?inicio=2025-01-01&fim=2025-12-31
 ```
 
-Lista os pedidos com status `ENTREGUE` do cliente autenticado dentro do intervalo de datas. O CPF é extraído automaticamente do token.
+---
+
+### Impostos e Descontos (Admin)
+
+#### Listar estratégias de desconto disponíveis
+```
+GET /admin/desconto
+```
+
+#### Trocar estratégia de desconto ativa
+```
+PUT /admin/desconto/{codigo}
+```
+
+Estratégias disponíveis: `SemDesconto`, `DescontoFidelidade`, `PromocaoVerao`
+
+O imposto é configurado via variável de ambiente `IMPOSTO_ATIVO`. Estratégias disponíveis: `lei_1234` (10% flat), `lei_5678` (progressivo).
 
 ---
 
-## Clientes disponíveis no banco (dados iniciais)
+## Fluxo completo de um pedido
+
+```
+1. POST /clientes/login              → obter token
+2. GET  /cardapio/corrente           → ver produtos disponíveis
+3. POST /pedidos/submeter            → criar pedido → retorna id + APROVADO ou REPROVADO
+4. POST /pedidos/{id}/pagar          → pagar (somente se APROVADO)
+5. GET  /pedidos/status/{id}         → acompanhar: PAGO → AGUARDANDO → PREPARACAO → PRONTO
+                                          (automático via RabbitMQ) → TRANSPORTE → ENTREGUE
+```
+
+---
+
+## Dados iniciais
+
+### Clientes
 
 | CPF | Nome | Email | Senha |
-|-----|------|-------|-------|
+|---|---|---|---|
 | `9001` | Huguinho Pato | `huguinho.pato@email.com` | `123456` |
 | `9002` | Luizinho Pato | `zezinho.pato@email.com` | `123456` |
 
----
-
-## Produtos (cardápio ativo: ID 2)
+### Cardápio ativo (ID 2)
 
 | ID | Produto | Preço |
-|----|---------|-------|
+|---|---|---|
 | 1 | Pizza calabresa | R$ 55,00 |
 | 3 | Pizza margherita | R$ 40,00 |
 | 4 | Pizza portuguesa | R$ 65,00 |
@@ -252,66 +278,39 @@ Lista os pedidos com status `ENTREGUE` do cliente autenticado dentro do interval
 
 ---
 
-## Fluxo completo de um pedido
+## Estrutura do repositório
 
 ```
-1. POST /clientes/login              → autenticar e obter token
-2. GET  /cardapio/corrente           → ver produtos disponíveis
-3. POST /pedidos/submeter            → criar pedido (retorna id + status)
-4. GET  /pedidos/status/{id}         → consultar status
-5. POST /pedidos/{id}/pagar          → pagar (só se APROVADO)
-6. GET  /pedidos/status/{id}         → confirmar novo status (PAGO → AGUARDANDO → ... → ENTREGUE)
-```
-
----
-
-## Arquitetura
-
-O projeto segue **Clean Architecture** em 4 camadas:
-
-```
-┌────────────────────────────────────────────┐
-│      ADAPTADORES (Interface Externa)       │
-│  Controllers | Presenters | Repositórios   │
-│  AutenticacaoFilter                        │
-├────────────────────────────────────────────┤
-│      APLICAÇÃO (Casos de Uso)              │
-│  RegistrarClienteUC  (UC1)                 │
-│  AutenticarUC        (UC2)                 │
-│  CarregarCardapioUC  (UC3)                 │
-│  SubmeterPedidoUC    (UC4)                 │
-│  SolicitaStatusPedidoUC (UC5)              │
-│  CancelarPedidoUC    (UC6)                 │
-│  PagarPedidoUC       (UC7)                 │
-│  ListarPedidosEntreguesUC       (UC8)      │
-│  ListarPedidosClienteEntreguesUC (UC9)     │
-├────────────────────────────────────────────┤
-│      DOMÍNIO (Lógica de Negócio)           │
-│  Entidades | Serviços | Interfaces         │
-│  Pedido | Cliente | Produto | Cardápio     │
-├────────────────────────────────────────────┤
-│      INFRAESTRUTURA                        │
-│  Spring Boot | JDBC | H2 Database          │
-└────────────────────────────────────────────┘
+/
+├── eureka-server/          → Name server (Spring Cloud Netflix Eureka)
+├── gateway/                → Spring Cloud Gateway com autenticação JWT
+├── pizzaria/               → Monolito principal (Clean Architecture)
+│   ├── Adaptadores/        → Controllers, filtros, repositórios
+│   ├── Aplicacao/          → Casos de uso (UC1–UC9)
+│   └── Dominio/            → Entidades, serviços, interfaces
+├── estoque/                → Microsserviço de estoque (JPA)
+├── entregas/               → Microsserviço de entregas (RabbitMQ consumer)
+└── docker-compose.yml      → Orquestração de todos os containers
 ```
 
 ---
 
 ## Tecnologias
 
-| Tecnologia | Versão | Uso |
-|-----------|--------|-----|
-| Java | 21 LTS | Linguagem principal |
-| Spring Boot | 3.5.4 | Framework web |
-| Spring JDBC | 3.5.4 | Acesso a dados |
-| H2 Database | — | Banco em memória (reinicia a cada boot) |
-| Lombok | — | Reduz boilerplate |
-| Maven | 3.9+ | Build e dependências |
+| Tecnologia | Uso |
+|---|---|
+| Java 21 | Linguagem principal |
+| Spring Boot 3.5 | Framework base |
+| Spring Cloud Gateway | API Gateway e roteamento |
+| Spring Cloud Netflix Eureka | Service discovery |
+| Spring Data JPA | Acesso a dados no microsserviço de estoque |
+| Spring AMQP (RabbitMQ) | Comunicação assíncrona com entregas |
+| H2 Database | Banco em memória (pizzaria e estoque) |
+| Docker Compose | Orquestração dos containers |
+| Lombok | Redução de boilerplate |
 
 ---
 
-## Referências
+## Equipe
 
-- [Clean Architecture - Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
-- [Domain-Driven Design - Eric Evans](https://www.domainlanguage.com/)
-- [Spring Boot Documentation](https://spring.io/projects/spring-boot)
+Trabalho desenvolvido em equipe de 5 integrantes para a disciplina PAS — Prof. Bernardo Copstein.
