@@ -33,9 +33,9 @@ public class ClienteController {
         return registrarClienteUC.executar(request);
     }
 
-    @PostMapping("/login")
+    @PostMapping("/validar-credenciais")
     @CrossOrigin("*")
-    public AutenticarResponse login(@RequestBody AutenticarRequest request) {
+    public AutenticarResponse validarCredenciais(@RequestBody AutenticarRequest request) {
         return autenticarUC.executar(request);
     }
 }

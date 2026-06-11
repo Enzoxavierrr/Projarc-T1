@@ -11,16 +11,13 @@ import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Cliente;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.ClienteJaCadastradoException;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.CpfInvalidoException;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.CredenciaisInvalidasException;
-import com.bcopstein.ex4_lancheriaddd_v1.Security.AutenticacaoService;
 
 @Service
 public class ClienteService {
     private ClienteRepository clienteRepository;
-    private AutenticacaoService autenticacaoService;
 
-    public ClienteService(ClienteRepository clienteRepository, AutenticacaoService autenticacaoService) {
+    public ClienteService(ClienteRepository clienteRepository) {
         this.clienteRepository = clienteRepository;
-        this.autenticacaoService = autenticacaoService;
     }
 
     public Cliente buscarPorCpf(String cpf) {
@@ -56,20 +53,14 @@ public class ClienteService {
     }
 
     public AutenticarResponse autenticar(AutenticarRequest request) {
-        
         Cliente cliente = clienteRepository.buscarPorEmail(request.email());
-
-        // se não encontrou ou a senha não bate → mesma exceção (segurança)
         if (cliente == null || !cliente.getSenha().equals(request.senha())) {
             throw new CredenciaisInvalidasException();
         }
 
-        String token = autenticacaoService.gerarToken(cliente.getCpf());
-
-        return new AutenticarResponse(
+         return new AutenticarResponse(
             cliente.getCpf(),
-            token,
-            "Usuario @" + cliente.getNome() + " logado com sucesso."
+            "Credenciais validas."
         );
     }
 }

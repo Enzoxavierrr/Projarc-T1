@@ -1,5 +1,5 @@
 server:
-  port: 8080   # única porta exposta para o mundo externo
+  port: 8080   # único ponto de entrada externo
 
 spring:
   application:
@@ -8,9 +8,9 @@ spring:
     gateway:
       routes:
         - id: lancheria-app
-          uri: lb://lancheria-app   # lb:// = load-balanced via Eureka
+          uri: lb://lancheria-app   # lb:// resolve o nome via Eureka
           predicates:
-            - Path=/**
+            - Path=/**              # todo o resto vai pro monolito
 
 eureka:
   client:

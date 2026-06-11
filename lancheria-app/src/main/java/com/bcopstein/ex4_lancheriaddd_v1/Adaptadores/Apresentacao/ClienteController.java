@@ -33,9 +33,11 @@ public class ClienteController {
         return registrarClienteUC.executar(request);
     }
 
-    @PostMapping("/login")
+    // Endpoint interno — chamado apenas pelo gateway para validar credenciais
+    // Não gera token, só confirma se email+senha são válidos e retorna o CPF
+    @PostMapping("/validar-credenciais")
     @CrossOrigin("*")
-    public AutenticarResponse login(@RequestBody AutenticarRequest request) {
+    public AutenticarResponse validarCredenciais(@RequestBody AutenticarRequest request) {
         return autenticarUC.executar(request);
     }
 }
