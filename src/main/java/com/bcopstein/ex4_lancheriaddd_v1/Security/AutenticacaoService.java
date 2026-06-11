@@ -1,4 +1,4 @@
-package com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos;
+package com.bcopstein.ex4_lancheriaddd_v1.Security;
 
 import java.util.Map;
 import java.util.UUID;

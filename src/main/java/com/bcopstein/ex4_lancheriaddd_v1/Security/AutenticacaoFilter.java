@@ -1,12 +1,10 @@
-package com.bcopstein.ex4_lancheriaddd_v1.Adaptadores.Apresentacao;
+package com.bcopstein.ex4_lancheriaddd_v1.Security;
 
 import java.io.IOException;
 
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos.AutenticacaoService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -41,13 +39,14 @@ public class AutenticacaoFilter extends OncePerRequestFilter {
         if (path.equals("/clientes/registrar")) return true;
         if (path.equals("/clientes/login")) return true;
 
-        // UCs com autenticacao obrigatoria (A): UC3, UC4, UC5, UC6, UC7
+        // UCs com autenticacao obrigatoria: UC3, UC4, UC5, UC6, UC7, UC9
         boolean uc3 = path.startsWith("/cardapio");
         boolean uc4 = "POST".equalsIgnoreCase(method) && path.equals("/pedidos/submeter");
         boolean uc5 = "GET".equalsIgnoreCase(method) && path.startsWith("/pedidos/status/");
         boolean uc6 = "DELETE".equalsIgnoreCase(method) && path.matches("^/pedidos/\\d+$");
         boolean uc7 = "POST".equalsIgnoreCase(method) && path.matches("^/pedidos/\\d+/pagar$");
-        boolean endpointProtegido = uc3 || uc4 || uc5 || uc6 || uc7;
+        boolean uc9 = "GET".equalsIgnoreCase(method) && path.equals("/pedidos/entregues/meus");
+        boolean endpointProtegido = uc3 || uc4 || uc5 || uc6 || uc7 || uc9;
         return !endpointProtegido;
     }
 
