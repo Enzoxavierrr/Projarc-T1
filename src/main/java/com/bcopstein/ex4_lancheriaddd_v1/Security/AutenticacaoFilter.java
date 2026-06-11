@@ -1,12 +1,10 @@
-package com.bcopstein.ex4_lancheriaddd_v1.Adaptadores.Apresentacao;
+package com.bcopstein.ex4_lancheriaddd_v1.Security;
 
 import java.io.IOException;
 
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos.AutenticacaoService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
