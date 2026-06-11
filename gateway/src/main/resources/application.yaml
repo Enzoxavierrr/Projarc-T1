@@ -1,0 +1,20 @@
+server:
+  port: 8080   # única porta exposta para o mundo externo
+
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      routes:
+        - id: lancheria-app
+          uri: lb://lancheria-app   # lb:// = load-balanced via Eureka
+          predicates:
+            - Path=/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+  instance:
+    prefer-ip-address: true
