@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: pizzaria
   datasource:
     url: jdbc:h2:mem:pizzadb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
@@ -20,7 +22,9 @@ logging:
         jdbc: DEBUG
     com:
       bcopstein: DEBUG
-application:
-  name: ex4-lancheriaddd-v1
 server:
   port: 8080
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}

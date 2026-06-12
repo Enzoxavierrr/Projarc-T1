@@ -11,16 +11,13 @@ import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Cliente;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.ClienteJaCadastradoException;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.CpfInvalidoException;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.CredenciaisInvalidasException;
-import com.bcopstein.ex4_lancheriaddd_v1.Security.AutenticacaoService;
 
 @Service
 public class ClienteService {
     private ClienteRepository clienteRepository;
-    private AutenticacaoService autenticacaoService;
 
-    public ClienteService(ClienteRepository clienteRepository, AutenticacaoService autenticacaoService) {
+    public ClienteService(ClienteRepository clienteRepository) {
         this.clienteRepository = clienteRepository;
-        this.autenticacaoService = autenticacaoService;
     }
 
     public Cliente buscarPorCpf(String cpf) {
@@ -64,11 +61,10 @@ public class ClienteService {
             throw new CredenciaisInvalidasException();
         }
 
-        String token = autenticacaoService.gerarToken(cliente.getCpf());
-
+        // Autenticacao validada: devolve apenas a identidade (CPF).
+        // A emissao do token (JWT) e responsabilidade do Gateway.
         return new AutenticarResponse(
             cliente.getCpf(),
-            token,
             "Usuario @" + cliente.getNome() + " logado com sucesso."
         );
     }

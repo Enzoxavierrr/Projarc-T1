@@ -58,7 +58,7 @@ public class PedidoController {
     @CrossOrigin("*")
     public PedidoResponse submeterPedido(@RequestBody SubmeterPedidoRequest request,
                                          HttpServletRequest httpRequest) {
-        String cpfAutenticado = (String) httpRequest.getAttribute("cpfAutenticado");
+        String cpfAutenticado = httpRequest.getHeader("X-User-Cpf");
         request.setClienteCpf(cpfAutenticado);
         return submeterPedidoUC.run(request);
     }
@@ -67,7 +67,7 @@ public class PedidoController {
     @CrossOrigin("*")
     public StatusPedidoResponse solicitaStatusUC(@PathVariable long idPedido,
                                                  HttpServletRequest httpRequest) {
-        String cpfAutenticado = (String) httpRequest.getAttribute("cpfAutenticado");
+        String cpfAutenticado = httpRequest.getHeader("X-User-Cpf");
         return solicitaStatusPedidoUC.run(idPedido, cpfAutenticado);
     }
 
@@ -75,7 +75,7 @@ public class PedidoController {
     @CrossOrigin("*")
     public PagarPedidoResponse pagar(@PathVariable long id,
                                      HttpServletRequest httpRequest) {
-        String cpfAutenticado = (String) httpRequest.getAttribute("cpfAutenticado");
+        String cpfAutenticado = httpRequest.getHeader("X-User-Cpf");
         PagarPedidoRequest request = new PagarPedidoRequest(cpfAutenticado);
         return pagarPedidoUC.executar(id, request);
     }
@@ -84,7 +84,7 @@ public class PedidoController {
     @CrossOrigin("*")
     public CancelarPedidoResponse cancelarPedido(@PathVariable long id,
                                                  HttpServletRequest httpRequest) {
-        String cpfAutenticado = (String) httpRequest.getAttribute("cpfAutenticado");
+        String cpfAutenticado = httpRequest.getHeader("X-User-Cpf");
         cancelarPedidoUC.executar(id, cpfAutenticado);
         return new CancelarPedidoResponse("Pedido cancelado com sucesso.");
     }
@@ -103,7 +103,7 @@ public class PedidoController {
             HttpServletRequest httpRequest,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim) {
-        String cpfAutenticado = (String) httpRequest.getAttribute("cpfAutenticado");
+        String cpfAutenticado = httpRequest.getHeader("X-User-Cpf");
         return listarPedidosClienteEntreguesUC.run(cpfAutenticado, inicio, fim);
     }
 }
