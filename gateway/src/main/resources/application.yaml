@@ -1,0 +1,27 @@
+server:
+  port: 8080   # único ponto de entrada externo
+
+spring:
+  application:
+    name: gateway
+  r2dbc:
+    url: r2dbc:h2:mem:///gatewaydb;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+  sql:
+    init:
+      mode: always
+  cloud:
+    gateway:
+      routes:
+        - id: lancheria-app
+          uri: lb://lancheria-app   # lb:// resolve o nome via Eureka
+          predicates:
+            - Path=/**              # todo o resto vai pro monolito
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+  instance:
+    prefer-ip-address: true

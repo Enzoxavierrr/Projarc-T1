@@ -8,22 +8,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.AutenticarUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.RegistrarClienteUC;
-import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Requests.AutenticarRequest;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Requests.RegistrarClienteRequest;
-import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.AutenticarResponse;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.Responses.RegistrarClienteResponse;
 
 @RestController
 @RequestMapping("/clientes")
 public class ClienteController {
     private RegistrarClienteUC registrarClienteUC;
-    private AutenticarUC autenticarUC;
 
-    public ClienteController(RegistrarClienteUC registrarClienteUC, AutenticarUC autenticarUC) {
+    public ClienteController(RegistrarClienteUC registrarClienteUC) {
         this.registrarClienteUC = registrarClienteUC;
-        this.autenticarUC = autenticarUC;
     }
 
     @PostMapping("/registrar")
@@ -31,11 +26,5 @@ public class ClienteController {
     @CrossOrigin("*")
     public RegistrarClienteResponse registrarCliente(@RequestBody RegistrarClienteRequest request) {
         return registrarClienteUC.executar(request);
-    }
-
-    @PostMapping("/validar-credenciais")
-    @CrossOrigin("*")
-    public AutenticarResponse validarCredenciais(@RequestBody AutenticarRequest request) {
-        return autenticarUC.executar(request);
     }
 }
