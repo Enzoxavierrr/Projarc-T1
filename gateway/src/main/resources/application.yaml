@@ -4,6 +4,13 @@ server:
 spring:
   application:
     name: gateway
+  r2dbc:
+    url: r2dbc:h2:mem:///gatewaydb;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+  sql:
+    init:
+      mode: always
   cloud:
     gateway:
       routes:

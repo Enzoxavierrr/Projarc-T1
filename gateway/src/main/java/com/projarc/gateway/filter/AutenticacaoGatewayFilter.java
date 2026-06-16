@@ -24,8 +24,7 @@ public class AutenticacaoGatewayFilter implements GlobalFilter, Ordered {
 
     private static final List<String> ROTAS_PUBLICAS = List.of(
         "/clientes/registrar",
-        "/clientes/login",
-        "/clientes/validar-credenciais"  // endpoint interno, chamado apenas pelo gateway
+        "/clientes/login"
     );
 
     @Override

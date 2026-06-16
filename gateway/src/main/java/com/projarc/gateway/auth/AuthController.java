@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import reactor.core.publisher.Mono;
 
@@ -17,40 +16,67 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/clientes")
 public class AuthController {
 
-    private final WebClient.Builder webClientBuilder;
+    private final CredencialRepository credencialRepository;
     private final TokenService tokenService;
+    private final WebClient.Builder webClientBuilder;
 
-    public AuthController(WebClient.Builder webClientBuilder, TokenService tokenService) {
-        this.webClientBuilder = webClientBuilder;
-        this.tokenService = tokenService;
+    public AuthController(CredencialRepository credencialRepository,
+                          TokenService tokenService,
+                          WebClient.Builder webClientBuilder) {
+        this.credencialRepository = credencialRepository;
+        this.tokenService         = tokenService;
+        this.webClientBuilder     = webClientBuilder;
     }
 
     /**
-     * Intercepta o login antes que chegue ao lancheria-app.
-     * 1) Chama /clientes/validar-credenciais no lancheria-app para checar email+senha
-     * 2) Recebe o CPF de volta
-     * 3) Gera o token aqui no gateway e devolve ao cliente
+     * Login: valida email+senha no banco do próprio gateway e gera o token aqui.
+     * Não chama o lancheria-app.
      */
     @PostMapping("/login")
-    public Mono<ResponseEntity<Map<String, String>>> login(@RequestBody Map<String, String> credenciais) {
-        return webClientBuilder.build()
-            .post()
-            .uri("lb://lancheria-app/clientes/validar-credenciais")
-            .bodyValue(credenciais)
-            .retrieve()
-            .bodyToMono(Map.class)
-            .map(response -> {
-                String cpf = (String) response.get("cpf");
-                String token = tokenService.gerarToken(cpf);
+    public Mono<ResponseEntity<Map<String, String>>> login(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        String senha = body.get("senha");
+
+        return credencialRepository.findByEmail(email)
+            .filter(c -> c.getSenha().equals(senha))
+            .map(c -> {
+                String token = tokenService.gerarToken(c.getCpf());
                 return ResponseEntity.ok(Map.of(
                     "token", token,
                     "mensagem", "Login realizado com sucesso."
                 ));
             })
-            .onErrorResume(WebClientResponseException.class, e ->
-                Mono.just(ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("erro", "Credenciais invalidas.")))
-            );
+            .switchIfEmpty(Mono.just(
+                ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("erro", "Credenciais invalidas."))
+            ));
+    }
+
+    /**
+     * Registro: salva credenciais no banco do gateway e repassa o cadastro completo
+     * ao lancheria-app (nome, celular, endereço etc.).
+     */
+    @PostMapping("/registrar")
+    public Mono<ResponseEntity<Map<String, String>>> registrar(@RequestBody Map<String, Object> body) {
+        String cpf   = (String) body.get("cpf");
+        String email = (String) body.get("email");
+        String senha = (String) body.get("senha");
+
+        return credencialRepository.save(new Credencial(cpf, email, senha))
+            .flatMap(saved ->
+                webClientBuilder.build()
+                    .post()
+                    .uri("lb://lancheria-app/clientes/registrar")
+                    .bodyValue(body)
+                    .retrieve()
+                    .toEntity(Map.class)
+                    .map(resp -> ResponseEntity
+                        .status(resp.getStatusCode())
+                        .body((Map<String, String>) resp.getBody()))
+            )
+            .onErrorResume(e -> Mono.just(
+                ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("erro", e.getMessage()))
+            ));
     }
 }
