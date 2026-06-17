@@ -20,18 +20,6 @@ INSERT INTO ingredientes (id, descricao) VALUES (7, 'Porcao de azeitona');
 INSERT INTO ingredientes (id, descricao) VALUES (8, 'Porcao de oregano');
 INSERT INTO ingredientes (id, descricao) VALUES (9, 'Porcao de cebola');
 
--- ================================================
--- ESTOQUE (quantidade aumentada para apresentacao)
--- ================================================
-INSERT INTO itensEstoque (id, quantidade, ingrediente_id) VALUES (1, 100, 1);
-INSERT INTO itensEstoque (id, quantidade, ingrediente_id) VALUES (2, 100, 2);
-INSERT INTO itensEstoque (id, quantidade, ingrediente_id) VALUES (3, 100, 3);
-INSERT INTO itensEstoque (id, quantidade, ingrediente_id) VALUES (4, 100, 4);
-INSERT INTO itensEstoque (id, quantidade, ingrediente_id) VALUES (5, 100, 5);
-INSERT INTO itensEstoque (id, quantidade, ingrediente_id) VALUES (6, 100, 6);
-INSERT INTO itensEstoque (id, quantidade, ingrediente_id) VALUES (7, 100, 7);
-INSERT INTO itensEstoque (id, quantidade, ingrediente_id) VALUES (8, 100, 8);
-INSERT INTO itensEstoque (id, quantidade, ingrediente_id) VALUES (9, 100, 9);
 
 -- ================================================
 -- RECEITAS

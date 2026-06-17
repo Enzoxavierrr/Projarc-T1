@@ -10,6 +10,9 @@ import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.ItemPedido;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Produto;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Receita;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Ingrediente;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.stereotype.Service;
+
 
 
 @Service
@@ -75,8 +78,40 @@ public class EstoqueServiceMicroServico implements IEstoqueService {
         }
         return itensIndisponiveis;
     }
+    
+    @Override
+    public void darBaixaEstoque(List<ItemPedido> itens) {
+        Map<Long, Integer> ingredientesNecessarios = new HashMap<>();
+
+        for (ItemPedido itemPedido : itens) {
+            Produto produto = itemPedido.getItem();
+            Receita receita = produto.getReceita();
+            
+            for (Ingrediente ingrediente : receita.getIngredientes()) {
+                long ingredienteId = ingrediente.getId();
+                int qtdNecessaria = itemPedido.getQuantidade();
+                
+                ingredientesNecessarios.put(
+                    ingredienteId, 
+                    ingredientesNecessarios.getOrDefault(ingredienteId, 0) + qtdNecessaria
+                );
+            }
+        }
+
+        List<IngredienteQtd> payload = new ArrayList<>();
+
+        for (Map.Entry<Long, Integer> entry : ingredientesNecessarios.entrySet()) {
+            payload.add(new IngredienteQtd(entry.getKey(), entry.getValue()));
+        }
+
+        restTemplate.postForObject(
+            "http://estoque/estoque/baixar", 
+            payload, 
+            Void.class
+        );
+    }
 
     public record IngredienteQtd(Long ingredienteId, int quantidade) {
-
+        
     }
 }

@@ -81,7 +81,7 @@ public class PedidoService implements IPedidoService {
         if (!pagamentoEfetuado) {
             throw new PagamentoNaoEfetuadoException();
         }
-
+        estoqueService.darBaixaEstoque(pedido.getItens());
         pedidoRepository.atualizarStatus(id, Pedido.Status.PAGO);
         pedido.setStatus(Pedido.Status.PAGO);
         return pedido;

@@ -1,0 +1,36 @@
+meta {
+  name: Baixar Estoque
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/estoque/baixar
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  [
+    {
+      "ingredienteId": 1,
+      "quantidade": 10
+    },
+    {
+      "ingredienteId": 3,
+      "quantidade": 10
+    }
+  ]
+}
+
+vars:pre-request {
+  base_url: http://localhost:8080
+}
