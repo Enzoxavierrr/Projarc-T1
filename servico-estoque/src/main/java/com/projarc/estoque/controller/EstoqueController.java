@@ -2,7 +2,9 @@ package com.projarc.estoque.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,5 +34,10 @@ public class EstoqueController {
     public ResponseEntity<Void> baixarEstoque(@RequestBody List<IngredienteQtdDTO> itensParaBaixar) {
         estoqueService.baixarEstoque(itensParaBaixar);
         return ResponseEntity.ok().build();
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<String> handleEstoqueInsuficiente(IllegalStateException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 }

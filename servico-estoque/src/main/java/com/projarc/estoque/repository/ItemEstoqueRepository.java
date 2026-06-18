@@ -7,5 +7,5 @@ import com.projarc.estoque.domain.ItemEstoque;
 
 @Repository
 public interface ItemEstoqueRepository extends JpaRepository<ItemEstoque, Long> {
-    Optional<ItemEstoque> findByIngredienteId(Long ingredienteId);
+    Optional<ItemEstoque> findByIngrediente_Id(Long ingredienteId);
 }
