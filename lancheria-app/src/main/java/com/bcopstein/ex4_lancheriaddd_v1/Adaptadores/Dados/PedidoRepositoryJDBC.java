@@ -120,7 +120,64 @@ public class PedidoRepositoryJDBC implements PedidoRepository {
                      "FROM pedidos p JOIN clientes c ON p.cliente_cpf = c.cpf " +
                      "WHERE p.id = ?";
         List<Pedido> resultado = jdbcTemplate.query(sql, ps -> ps.setLong(1, id), PEDIDO_ROW_MAPPER);
-        return resultado.isEmpty() ? Optional.empty() : Optional.of(resultado.getFirst());
+        if (resultado.isEmpty()) {
+            return Optional.empty();
+        }
+        Pedido pedidoSemItens = resultado.getFirst();
+
+        // Carrega os itens do pedido com suas respectivas receitas e ingredientes
+        String itemsSql = "SELECT ip.id as item_id, ip.quantidade, ip.produto_id, p.descricao as prod_desc, p.preco, p.disponivel, pr.receita_id, r.titulo as rec_titulo " +
+                          "FROM itens_pedido ip " +
+                          "JOIN produtos p ON ip.produto_id = p.id " +
+                          "JOIN produto_receita pr ON p.id = pr.produto_id " +
+                          "JOIN receitas r ON pr.receita_id = r.id " +
+                          "WHERE ip.pedido_id = ?";
+
+        List<ItemPedido> itens = jdbcTemplate.query(itemsSql, ps -> ps.setLong(1, id), (rs, rowNum) -> {
+            long produtoId = rs.getLong("produto_id");
+            String prodDesc = rs.getString("prod_desc");
+            int preco = rs.getInt("preco");
+            boolean disponivel = rs.getBoolean("disponivel");
+            long receitaId = rs.getLong("receita_id");
+            String recTitulo = rs.getString("rec_titulo");
+
+            // Carrega os ingredientes para esta receita
+            String ingredientsSql = "SELECT i.id, i.descricao " +
+                                    "FROM ingredientes i " +
+                                    "JOIN receita_ingrediente ri ON i.id = ri.ingrediente_id " +
+                                    "WHERE ri.receita_id = ?";
+            List<com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Ingrediente> ingredientes = jdbcTemplate.query(
+                ingredientsSql,
+                ps -> ps.setLong(1, receitaId),
+                (rsIng, rNum) -> new com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Ingrediente(
+                    rsIng.getLong("id"),
+                    rsIng.getString("descricao")
+                )
+            );
+
+            com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Receita receita = 
+                new com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Receita(receitaId, recTitulo, ingredientes);
+
+            com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Produto produto = 
+                new com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Produto(produtoId, prodDesc, receita, preco, disponivel);
+
+            return new ItemPedido(produto, rs.getInt("quantidade"));
+        });
+
+        Pedido pedidoCompleto = new Pedido(
+            pedidoSemItens.getId(),
+            pedidoSemItens.getCliente(),
+            pedidoSemItens.getDataHoraPagamento(),
+            itens,
+            pedidoSemItens.getStatus(),
+            pedidoSemItens.getValor(),
+            pedidoSemItens.getImpostos(),
+            pedidoSemItens.getDesconto(),
+            pedidoSemItens.getValorCobrado(),
+            pedidoSemItens.getEnderecoEntrega()
+        );
+
+        return Optional.of(pedidoCompleto);
     }
 
     @Override

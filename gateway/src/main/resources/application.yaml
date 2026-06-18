@@ -14,6 +14,10 @@ spring:
   cloud:
     gateway:
       routes:
+        - id: estoque
+          uri: lb://estoque
+          predicates:
+            - Path=/estoque/**
         - id: lancheria-app
           uri: lb://lancheria-app   # lb:// resolve o nome via Eureka
           predicates:

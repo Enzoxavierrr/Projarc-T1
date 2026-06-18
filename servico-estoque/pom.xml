@@ -9,10 +9,11 @@
 		<version>3.3.5</version>
 		<relativePath />
 	</parent>
-	<groupId>com.bcopstein</groupId>
-	<artifactId>lancheria-app</artifactId>
+	<groupId>com.projarc</groupId>
+	<artifactId>servico-estoque</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>lancheria-app</name>
+	<name>servico-estoque</name>
+	<description>Estoque Microservice</description>
 
 	<properties>
 		<java.version>21</java.version>
@@ -35,17 +36,15 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-jdbc</artifactId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-			<scope>runtime</scope>
-			<optional>true</optional>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.h2database</groupId>
@@ -61,11 +60,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
-		</dependency>
-		<!-- Eureka Client: registra o monolito no nameserver -->
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 		</dependency>
 	</dependencies>
 

@@ -1,0 +1,36 @@
+meta {
+  name: Verificar Estoque
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/estoque/verificar
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  [
+    {
+      "ingredienteId": 1,
+      "quantidade": 2
+    },
+    {
+      "ingredienteId": 5,
+      "quantidade": 150
+    }
+  ]
+}
+
+vars:pre-request {
+  base_url: http://localhost:8080
+}

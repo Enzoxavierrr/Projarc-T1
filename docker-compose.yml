@@ -24,6 +24,17 @@ services:
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
 
+  estoque:
+    build: ./servico-estoque
+    container_name: estoque
+    networks:
+      - lancheria-net
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+
   gateway:
     build: ./gateway
     container_name: gateway
