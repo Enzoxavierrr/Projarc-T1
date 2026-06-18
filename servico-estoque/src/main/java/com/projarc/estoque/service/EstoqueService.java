@@ -29,7 +29,7 @@ public class EstoqueService {
         List<IngredienteQtdDTO> ingredientesFaltantes = new ArrayList<>();
 
         for (IngredienteQtdDTO item : itensNecessarios) {
-            Optional<ItemEstoque> optItemEstoque = itemEstoqueRepository.findByIngredienteId(item.getIngredienteId());
+            Optional<ItemEstoque> optItemEstoque = itemEstoqueRepository.findByIngrediente_Id(item.getIngredienteId());
 
             if (optItemEstoque.isEmpty()) {
                 // Se não existe o item no estoque, ele está totalmente faltando
@@ -49,21 +49,31 @@ public class EstoqueService {
 
     /**
      * Desconta as quantidades de ingredientes do estoque.
+     * Valida todos os itens antes de persistir qualquer alteração.
+     * Lança IllegalStateException se algum ingrediente não tiver estoque suficiente.
      */
     @Transactional
     public void baixarEstoque(List<IngredienteQtdDTO> itensParaBaixar) {
-        for (IngredienteQtdDTO item : itensParaBaixar) {
-            Optional<ItemEstoque> optItemEstoque = itemEstoqueRepository.findByIngredienteId(item.getIngredienteId());
+        List<ItemEstoque> itensAAtualizar = new ArrayList<>();
 
-            if (optItemEstoque.isPresent()) {
-                ItemEstoque itemEstoque = optItemEstoque.get();
-                int novaQuantidade = itemEstoque.getQuantidade() - item.getQuantidade();
-                if (novaQuantidade < 0) {
-                    novaQuantidade = 0; // Evita estoque negativo
-                }
-                itemEstoque.setQuantidade(novaQuantidade);
-                itemEstoqueRepository.save(itemEstoque);
+        for (IngredienteQtdDTO item : itensParaBaixar) {
+            Optional<ItemEstoque> optItemEstoque = itemEstoqueRepository.findByIngrediente_Id(item.getIngredienteId());
+
+            if (optItemEstoque.isEmpty()) {
+                throw new IllegalStateException(
+                        "Ingrediente não encontrado no estoque: " + item.getIngredienteId());
             }
+
+            ItemEstoque itemEstoque = optItemEstoque.get();
+            int novaQuantidade = itemEstoque.getQuantidade() - item.getQuantidade();
+            if (novaQuantidade < 0) {
+                throw new IllegalStateException(
+                        "Estoque insuficiente para ingrediente: " + item.getIngredienteId());
+            }
+            itemEstoque.setQuantidade(novaQuantidade);
+            itensAAtualizar.add(itemEstoque);
         }
+
+        itemEstoqueRepository.saveAll(itensAAtualizar);
     }
 }
