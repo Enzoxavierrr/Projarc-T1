@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -56,38 +57,50 @@ public class PedidoController {
 
     @PostMapping("/submeter")
     @CrossOrigin("*")
-    public PedidoResponse submeterPedido(@RequestBody SubmeterPedidoRequest request,
+    public ResponseEntity<PedidoResponse> submeterPedido(@RequestBody SubmeterPedidoRequest request,
                                          HttpServletRequest httpRequest) {
         // CPF vem como header injetado pelo gateway
         String cpfAutenticado = httpRequest.getHeader("X-CPF-Autenticado");
+        if (cpfAutenticado == null || cpfAutenticado.isBlank()) {
+            return ResponseEntity.status(401).build();
+        }
         request.setClienteCpf(cpfAutenticado);
-        return submeterPedidoUC.run(request);
+        return ResponseEntity.ok(submeterPedidoUC.run(request));
     }
 
     @GetMapping("/status/{idPedido}")
     @CrossOrigin("*")
-    public StatusPedidoResponse solicitaStatusUC(@PathVariable long idPedido,
+    public ResponseEntity<StatusPedidoResponse> solicitaStatusUC(@PathVariable long idPedido,
                                                  HttpServletRequest httpRequest) {
         String cpfAutenticado = httpRequest.getHeader("X-CPF-Autenticado");
-        return solicitaStatusPedidoUC.run(idPedido, cpfAutenticado);
+        if (cpfAutenticado == null || cpfAutenticado.isBlank()) {
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(solicitaStatusPedidoUC.run(idPedido, cpfAutenticado));
     }
 
     @PostMapping("/{id}/pagar")
     @CrossOrigin("*")
-    public PagarPedidoResponse pagar(@PathVariable long id,
+    public ResponseEntity<PagarPedidoResponse> pagar(@PathVariable long id,
                                      HttpServletRequest httpRequest) {
         String cpfAutenticado = httpRequest.getHeader("X-CPF-Autenticado");
+        if (cpfAutenticado == null || cpfAutenticado.isBlank()) {
+            return ResponseEntity.status(401).build();
+        }
         PagarPedidoRequest request = new PagarPedidoRequest(cpfAutenticado);
-        return pagarPedidoUC.executar(id, request);
+        return ResponseEntity.ok(pagarPedidoUC.executar(id, request));
     }
 
     @DeleteMapping("/{id}")
     @CrossOrigin("*")
-    public CancelarPedidoResponse cancelarPedido(@PathVariable long id,
+    public ResponseEntity<CancelarPedidoResponse> cancelarPedido(@PathVariable long id,
                                                  HttpServletRequest httpRequest) {
         String cpfAutenticado = httpRequest.getHeader("X-CPF-Autenticado");
+        if (cpfAutenticado == null || cpfAutenticado.isBlank()) {
+            return ResponseEntity.status(401).build();
+        }
         cancelarPedidoUC.executar(id, cpfAutenticado);
-        return new CancelarPedidoResponse("Pedido cancelado com sucesso.");
+        return ResponseEntity.ok(new CancelarPedidoResponse("Pedido cancelado com sucesso."));
     }
 
     @GetMapping("/entregues")
@@ -100,11 +113,14 @@ public class PedidoController {
 
     @GetMapping("/entregues/meus")
     @CrossOrigin("*")
-    public List<PedidoListagemResponse> listarEntreguesDoCliente(
+    public ResponseEntity<List<PedidoListagemResponse>> listarEntreguesDoCliente(
             HttpServletRequest httpRequest,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim) {
         String cpfAutenticado = httpRequest.getHeader("X-CPF-Autenticado");
-        return listarPedidosClienteEntreguesUC.run(cpfAutenticado, inicio, fim);
+        if (cpfAutenticado == null || cpfAutenticado.isBlank()) {
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(listarPedidosClienteEntreguesUC.run(cpfAutenticado, inicio, fim));
     }
 }
