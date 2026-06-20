@@ -13,6 +13,20 @@ services:
       timeout: 5s
       retries: 5
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - lancheria-net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   lancheria-app:
     build: ./lancheria-app
     container_name: lancheria-app
@@ -21,8 +35,11 @@ services:
     depends_on:
       eureka-server:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - RABBITMQ_HOST=rabbitmq
 
   estoque:
     build: ./servico-estoque
@@ -47,6 +64,21 @@ services:
         condition: service_healthy
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+
+  entregas:
+    build: ./servico-entregas
+    expose:
+      - "8083"
+    networks:
+      - lancheria-net
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - RABBITMQ_HOST=rabbitmq
 
 networks:
   lancheria-net:
