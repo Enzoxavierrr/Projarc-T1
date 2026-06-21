@@ -33,4 +33,11 @@ public class CardapioService {
         long id = cardapioRepository.recuperaIdCardapioCorrente();
         return cardapioRepository.recuperaPorId(id);
     } 
+
+    public void definirCardapioCorrente(long id) {
+        if (cardapioRepository.recuperaPorId(id) == null) {
+            throw new IllegalArgumentException("Cardapio nao encontrado com id: " + id);
+        }
+        cardapioRepository.definirIdCardapioCorrente(id);
+    }
 }

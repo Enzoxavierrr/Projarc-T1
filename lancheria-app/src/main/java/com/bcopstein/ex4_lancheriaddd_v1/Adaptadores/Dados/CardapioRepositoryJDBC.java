@@ -60,4 +60,10 @@ public class CardapioRepositoryJDBC implements CardapioRepository{
         String sql = "SELECT cardapio_ativo FROM config WHERE nome_cardapio = 'cardapio_corrente'";
         return Long.parseLong(jdbcTemplate.queryForObject(sql, String.class));
     }
+
+    @Override
+    public void definirIdCardapioCorrente(long id) {
+        String sql = "UPDATE config SET cardapio_ativo = ? WHERE nome_cardapio = 'cardapio_corrente'";
+        jdbcTemplate.update(sql, String.valueOf(id));
+    }
 }

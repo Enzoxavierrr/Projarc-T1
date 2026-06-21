@@ -1,0 +1,15 @@
+meta {
+  name: Definir Cardapio Corrente
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{base_url}}/admin/cardapio/3
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

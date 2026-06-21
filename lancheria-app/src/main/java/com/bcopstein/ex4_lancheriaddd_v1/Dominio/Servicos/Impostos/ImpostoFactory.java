@@ -19,8 +19,8 @@ public class ImpostoFactory {
                 return new ImpostoLei5678();
             default:
                 throw new IllegalArgumentException(
-                    "Lei de imposto desconhecida: '" + impostoAtivo
-                    + "'. Valores válidos: lei_1234, lei_5678.");
+                        "Lei de imposto desconhecida: '" + impostoAtivo
+                                + "'. Valores válidos: lei_1234, lei_5678.");
         }
     }
 }

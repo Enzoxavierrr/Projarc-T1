@@ -25,7 +25,7 @@ imposto:
   ativo: ${IMPOSTO_ATIVO:lei_1234}
 
 server:
-  port: 8081   # porta interna, não exposta diretamente
+  port: 8081 # porta interna, não exposta diretamente
 
 eureka:
   client:
