@@ -64,4 +64,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleCredenciaisInvalidas(CredenciaisInvalidasException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {
+        String msg = ex.getMessage() != null ? ex.getMessage() : "Requisicao invalida";
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
+    }
 }
