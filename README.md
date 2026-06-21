@@ -51,13 +51,19 @@ A Parte 1 implementou o sistema como monolito com Clean Architecture. A Parte 2 
 ### Subir tudo
 
 ```bash
-docker compose up
+docker compose up --build
 ```
 
 ### Subir com 3 instâncias do serviço de entregas
 
 ```bash
 docker compose up --scale entregas=3
+```
+
+Para acompanhar qual instância processou cada pedido:
+
+```bash
+docker compose logs -f entregas
 ```
 
 ### Verificar serviços registrados no Eureka
@@ -75,13 +81,30 @@ Acesse `http://localhost:15672` — usuário `guest`, senha `guest`.
 | Variável | Padrão | Descrição |
 |---|---|---|
 | `IMPOSTO_ATIVO` | `lei_1234` | Define a estratégia de imposto ativa |
-| `EUREKA_URL` | `http://eureka:8761/eureka` | URL do Eureka Server |
+| `EUREKA_CLIENT_SERVICEURL_DEFAULTZONE` | `http://eureka-server:8761/eureka/` | URL do Eureka Server |
 | `RABBITMQ_HOST` | `rabbitmq` | Host do RabbitMQ |
 
 Exemplo de uso:
 ```bash
 IMPOSTO_ATIVO=lei_5678 docker compose up
 ```
+
+---
+
+## Entregas assíncronas
+
+Quando a cozinha marca um pedido como `PRONTO`, o monólito publica uma mensagem
+no RabbitMQ. As instâncias do microsserviço de entregas concorrem pela mesma fila:
+cada pedido é consumido por apenas uma instância.
+
+| Fluxo | Exchange | Fila | Routing key |
+|---|---|---|---|
+| Pedido pronto → entregas | `pedidos.entrega` | `pedidos.entrega` | `pedido.pronto` |
+| Atualização de status → monólito | `entregas.status` | `entregas.status` | `pedido.status` |
+
+O contrato publicado para entrega contém `pedidoId`, `clienteCpf` e
+`enderecoEntrega`. O microsserviço simula a entrega e publica os estados
+`TRANSPORTE` e `ENTREGUE`, que são persistidos pelo monólito.
 
 ---
 
@@ -284,12 +307,12 @@ O imposto é configurado via variável de ambiente `IMPOSTO_ATIVO`. Estratégias
 /
 ├── eureka-server/          → Name server (Spring Cloud Netflix Eureka)
 ├── gateway/                → Spring Cloud Gateway com autenticação JWT
-├── pizzaria/               → Monolito principal (Clean Architecture)
+├── lancheria-app/          → Monolito principal (Clean Architecture)
 │   ├── Adaptadores/        → Controllers, filtros, repositórios
 │   ├── Aplicacao/          → Casos de uso (UC1–UC9)
 │   └── Dominio/            → Entidades, serviços, interfaces
-├── estoque/                → Microsserviço de estoque (JPA)
-├── entregas/               → Microsserviço de entregas (RabbitMQ consumer)
+├── servico-estoque/        → Microsserviço de estoque (JPA)
+├── servico-entregas/       → Microsserviço de entregas (RabbitMQ consumer)
 └── docker-compose.yml      → Orquestração de todos os containers
 ```
 
@@ -300,7 +323,7 @@ O imposto é configurado via variável de ambiente `IMPOSTO_ATIVO`. Estratégias
 | Tecnologia | Uso |
 |---|---|
 | Java 21 | Linguagem principal |
-| Spring Boot 3.5 | Framework base |
+| Spring Boot 3.3.5 | Framework base |
 | Spring Cloud Gateway | API Gateway e roteamento |
 | Spring Cloud Netflix Eureka | Service discovery |
 | Spring Data JPA | Acesso a dados no microsserviço de estoque |
