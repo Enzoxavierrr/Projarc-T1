@@ -21,6 +21,9 @@ spring:
     username: ${RABBITMQ_USERNAME:guest}
     password: ${RABBITMQ_PASSWORD:guest}
 
+imposto:
+  ativo: ${IMPOSTO_ATIVO:lei_1234}
+
 server:
   port: 8081   # porta interna, não exposta diretamente
 
