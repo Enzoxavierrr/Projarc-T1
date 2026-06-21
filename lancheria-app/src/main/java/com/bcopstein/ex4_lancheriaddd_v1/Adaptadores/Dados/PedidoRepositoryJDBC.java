@@ -17,6 +17,7 @@ import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Entidades.Pedido;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Excecoes.PedidoNaoEncontradoException;
 
 @Component
+@SuppressWarnings("null")
 public class PedidoRepositoryJDBC implements PedidoRepository {
     private JdbcTemplate jdbcTemplate;
 

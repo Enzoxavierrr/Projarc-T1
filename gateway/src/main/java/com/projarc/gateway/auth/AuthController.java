@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.reactive.function.client.WebClient;
-
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -69,10 +69,10 @@ public class AuthController {
                     .uri("lb://lancheria-app/clientes/registrar")
                     .bodyValue(body)
                     .retrieve()
-                    .toEntity(Map.class)
+                    .toEntity(new ParameterizedTypeReference<Map<String, String>>() {})
                     .map(resp -> ResponseEntity
                         .status(resp.getStatusCode())
-                        .body((Map<String, String>) resp.getBody()))
+                        .body(resp.getBody()))
             )
             .onErrorResume(e -> Mono.just(
                 ResponseEntity.status(HttpStatus.CONFLICT)

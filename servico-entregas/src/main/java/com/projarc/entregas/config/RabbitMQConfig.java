@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
 @EnableConfigurationProperties(EntregaSimulationProperties.class)
+@SuppressWarnings("null")
 public class RabbitMQConfig {
     public static final String PEDIDOS_EXCHANGE = "pedidos.entrega";
     public static final String PEDIDOS_QUEUE = "pedidos.entrega";

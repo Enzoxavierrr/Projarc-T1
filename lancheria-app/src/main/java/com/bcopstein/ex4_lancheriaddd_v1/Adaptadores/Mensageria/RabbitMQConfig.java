@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
+@SuppressWarnings("null")
 public class RabbitMQConfig {
     public static final String PEDIDOS_EXCHANGE = "pedidos.entrega";
     public static final String PEDIDOS_QUEUE = "pedidos.entrega";
