@@ -1,0 +1,26 @@
+meta {
+  name: Login Admin
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{base_url}}/clientes/login
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "admin@pizzaria.com",
+    "senha": "admin123"
+  }
+}
+
+script:post-response {
+  bru.setVar("admin_token", res.body.token);
+}

@@ -1,0 +1,26 @@
+meta {
+  name: Login Cliente (pre-cadastrado)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{base_url}}/clientes/login
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "huguinho.pato@email.com",
+    "senha": "123456"
+  }
+}
+
+script:post-response {
+  bru.setVar("token", res.body.token);
+}

@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bcopstein.ex4_lancheriaddd_v1.Aplicacao.DefinirCardapioCorrenteUC;
 import com.bcopstein.ex4_lancheriaddd_v1.Dominio.Servicos.Descontos.DescontoContext;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
@@ -27,23 +29,32 @@ public class AdminController {
 
     @GetMapping("/desconto")
     @CrossOrigin("*")
-    public Map<String, Object> listarDescontos() {
-        return Map.of(
+    public ResponseEntity<Map<String, Object>> listarDescontos(HttpServletRequest request) {
+        if (!isAdmin(request)) return ResponseEntity.status(403).build();
+        return ResponseEntity.ok(Map.of(
             "disponiveis", descontoContext.listarCodigosDisponiveis(),
-            "ativo", descontoContext.getCodigoAtivo());
+            "ativo", descontoContext.getCodigoAtivo()));
     }
 
     @PutMapping("/desconto/{codigo}")
     @CrossOrigin("*")
-    public ResponseEntity<Void> definirEstrategia(@PathVariable String codigo) {
+    public ResponseEntity<Void> definirEstrategia(@PathVariable String codigo,
+                                                   HttpServletRequest request) {
+        if (!isAdmin(request)) return ResponseEntity.status(403).build();
         descontoContext.definirEstrategiaAtiva(codigo);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/cardapio/{id}")
     @CrossOrigin("*")
-    public ResponseEntity<Void> definirCardapioCorrente(@PathVariable long id) {
+    public ResponseEntity<Void> definirCardapioCorrente(@PathVariable long id,
+                                                         HttpServletRequest request) {
+        if (!isAdmin(request)) return ResponseEntity.status(403).build();
         definirCardapioCorrenteUC.run(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private boolean isAdmin(HttpServletRequest request) {
+        return "ADMIN".equals(request.getHeader("X-Role-Autenticado"));
     }
 }

@@ -12,6 +12,7 @@ public class Credencial implements Persistable<String> {
     private String cpf;
     private String email;
     private String senha;
+    private String role;
 
     @Transient
     private boolean isNew = true;
@@ -22,6 +23,7 @@ public class Credencial implements Persistable<String> {
         this.cpf   = cpf;
         this.email = email;
         this.senha = senha;
+        this.role  = "CLIENTE";
     }
 
     @Override
@@ -33,4 +35,5 @@ public class Credencial implements Persistable<String> {
     public String getCpf()   { return cpf; }
     public String getEmail() { return email; }
     public String getSenha() { return senha; }
+    public String getRole()  { return role != null ? role : "CLIENTE"; }
 }

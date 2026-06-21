@@ -40,7 +40,7 @@ public class AuthController {
         return credencialRepository.findByEmail(email)
             .filter(c -> c.getSenha().equals(senha))
             .map(c -> {
-                String token = tokenService.gerarToken(c.getCpf());
+                String token = tokenService.gerarToken(c.getCpf(), c.getRole());
                 return ResponseEntity.ok(Map.of(
                     "token", token,
                     "mensagem", "Login realizado com sucesso."

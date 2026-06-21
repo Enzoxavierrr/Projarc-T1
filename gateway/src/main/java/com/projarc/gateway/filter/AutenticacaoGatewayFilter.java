@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 
 import com.projarc.gateway.auth.TokenService;
+import com.projarc.gateway.auth.TokenService.TokenData;
 
 import reactor.core.publisher.Mono;
 
@@ -42,17 +43,19 @@ public class AutenticacaoGatewayFilter implements GlobalFilter, Ordered {
             return exchange.getResponse().setComplete();
         }
 
-        String token = authHeader.substring(7);
-        String cpf   = tokenService.validarToken(token);
+        String token       = authHeader.substring(7);
+        TokenData tokenData = tokenService.validarToken(token);
 
-        if (cpf == null) {
+        if (tokenData == null) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
 
-        // Injeta o CPF como header interno para o lancheria-app
+        // Injeta CPF e role como headers internos para o lancheria-app
         ServerWebExchange exchangeComCpf = exchange.mutate()
-            .request(r -> r.header("X-CPF-Autenticado", cpf))
+            .request(r -> r
+                .header("X-CPF-Autenticado",  tokenData.cpf())
+                .header("X-Role-Autenticado", tokenData.role()))
             .build();
 
         return chain.filter(exchangeComCpf);

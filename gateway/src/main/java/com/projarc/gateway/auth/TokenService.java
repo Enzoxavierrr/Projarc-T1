@@ -8,15 +8,18 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class TokenService {
-    private final Map<String, String> tokens = new ConcurrentHashMap<>();
 
-    public String gerarToken(String cpf) {
+    public record TokenData(String cpf, String role) {}
+
+    private final Map<String, TokenData> tokens = new ConcurrentHashMap<>();
+
+    public String gerarToken(String cpf, String role) {
         String token = UUID.randomUUID().toString();
-        tokens.put(token, cpf);
+        tokens.put(token, new TokenData(cpf, role));
         return token;
     }
 
-    public String validarToken(String token) {
+    public TokenData validarToken(String token) {
         return tokens.get(token);
     }
 }
