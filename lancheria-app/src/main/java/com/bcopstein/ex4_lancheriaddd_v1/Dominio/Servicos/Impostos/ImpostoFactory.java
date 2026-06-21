@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ImpostoFactory {
 
-    @Value("${IMPOSTO_ATIVO:lei_1234}")
+    @Value("${imposto.ativo:lei_1234}")
     private String impostoAtivo;
 
     @Bean
