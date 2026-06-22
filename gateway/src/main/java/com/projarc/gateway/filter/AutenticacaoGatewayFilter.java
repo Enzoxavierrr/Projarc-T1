@@ -24,6 +24,7 @@ public class AutenticacaoGatewayFilter implements GlobalFilter, Ordered {
     }
 
     private static final List<String> ROTAS_PUBLICAS = List.of(
+        "/",
         "/clientes/registrar",
         "/clientes/login"
     );
@@ -47,6 +48,12 @@ public class AutenticacaoGatewayFilter implements GlobalFilter, Ordered {
         TokenData tokenData = tokenService.validarToken(token);
 
         if (tokenData == null) {
+            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+            return exchange.getResponse().setComplete();
+        }
+
+        // Bloqueia acesso externo ao estoque para não-administradores
+        if (path.startsWith("/estoque/") && !"ADMIN".equals(tokenData.role())) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }

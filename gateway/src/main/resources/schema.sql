@@ -6,5 +6,4 @@ CREATE TABLE IF NOT EXISTS credenciais (
 );
 
 INSERT INTO credenciais (cpf, email, senha, role)
-VALUES ('00000000000', 'admin@pizzaria.com', 'admin123', 'ADMIN')
-ON CONFLICT (cpf) DO NOTHING;
+VALUES ('00000000000', 'admin@pizzaria.com', 'admin123', 'ADMIN');
